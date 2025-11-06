@@ -1,0 +1,13 @@
+# ==========================
+# Backend (Java / Maven)
+# ==========================
+studium-academico/target/
+studium-academico/.idea/
+studium-academico/.mvn/
+studium-academico/*.iml
+
+# Arquivo de configuração local — não deve ser versionado
+studium-academico/src/main/resources/application.properties
+
+# Evitar arquivos temporários do sistema
+*.log
