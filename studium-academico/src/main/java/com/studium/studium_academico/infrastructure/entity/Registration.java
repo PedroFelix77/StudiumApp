@@ -31,7 +31,7 @@ public class Registration extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "class_id")
-    private Class classEntity;
+    private Classes classEntity;
 
     @OneToMany(mappedBy = "registration", fetch = FetchType.LAZY)
     private List<Frequency> frequencies = new ArrayList<>();

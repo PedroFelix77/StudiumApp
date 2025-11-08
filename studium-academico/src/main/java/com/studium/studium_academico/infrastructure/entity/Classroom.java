@@ -22,7 +22,7 @@ public class Classroom extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "class_id")
-    private Class classEntity;
+    private Classes classEntity;
 
     @OneToMany(mappedBy = "classroom", fetch = FetchType.LAZY)
     private List<Frequency> frequencies = new ArrayList<>();

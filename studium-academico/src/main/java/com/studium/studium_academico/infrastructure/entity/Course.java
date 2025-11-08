@@ -34,7 +34,7 @@ public class Course extends BaseEntity {
     private List<Discipline> disciplines = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.LAZY)
-    private List<Class> classes = new ArrayList<>();
+    private List<Classes> classes = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
     private List<Registration> registrations = new ArrayList<>();

@@ -36,7 +36,7 @@ public class Grade extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "class_id")
-    private Class classGrade;
+    private Classes classGrade;
 
 }
 
