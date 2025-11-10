@@ -8,5 +8,6 @@ public record AuthLoginRequestDTO(
         @Email(message = "Informe um e-mail válido.")
         String email,
         @NotBlank(message = "A senha é obrigatória.")
-        String password) {
+        String password
+) {
 }
