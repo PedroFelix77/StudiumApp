@@ -32,4 +32,16 @@ public abstract class BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private EntityStatus status =  EntityStatus.ACTIVE;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.status == null) {
+            this.status = EntityStatus.ACTIVE;
+        }if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
+        if (this.updatedAt == null) {
+            this.updatedAt = LocalDateTime.now();
+        }
+    }
 }

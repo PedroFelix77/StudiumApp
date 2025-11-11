@@ -21,8 +21,8 @@ public class Institution extends BaseEntity {
     @Column(name = "cnpj",unique = true, nullable = false, length = 14)
     private String cnpj;
 
-    @Column(name = "telephone", nullable = false)
-    private String telephone;
+    @Column(name = "phone", nullable = false)
+    private String phone;
 
     @Column(name = "email",unique = true, nullable = false)
     private String email;
