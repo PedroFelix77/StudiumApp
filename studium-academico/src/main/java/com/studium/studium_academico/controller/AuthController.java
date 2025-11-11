@@ -31,7 +31,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid AuthLoginRequestDTO data) {
         try {
-            AuthLoginResponseDTO response = authService.login(data, authenticationManager);
+            AuthLoginResponseDTO response = authService.login(data);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());

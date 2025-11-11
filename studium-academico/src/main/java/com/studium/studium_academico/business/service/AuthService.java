@@ -13,6 +13,7 @@ import com.studium.studium_academico.infrastructure.security.TokenService;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +25,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 
 @Service
 public class AuthService implements UserDetailsService {
@@ -37,6 +40,9 @@ public class AuthService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private TokenService tokenService;
+    @Autowired
+    @Lazy
+    AuthenticationManager authenticationManager;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -44,7 +50,7 @@ public class AuthService implements UserDetailsService {
     }
 
     @Transactional
-    public AuthLoginResponseDTO login(AuthLoginRequestDTO data, AuthenticationManager authenticationManager){
+    public AuthLoginResponseDTO login(AuthLoginRequestDTO data){
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(data.email(), data.password())
         );
@@ -61,6 +67,13 @@ public class AuthService implements UserDetailsService {
             throw new RuntimeException("Email já cadastrado");
         }
 
+        if (repository.findByCpf(data.cpf()) != null){
+            throw new RuntimeException("CPF já cadastrado");
+        }
+        if (data.birthday().isAfter(LocalDate.now().minusYears(16))) {
+            throw new RuntimeException("Usuário deve ter pelo menos 16 anos");
+        }
+
         Address address = addressService.create(data.address());
 
         Institution institution = instRepository.findFirstByOrderByIdAsc()
@@ -74,6 +87,7 @@ public class AuthService implements UserDetailsService {
                         .email(data.email())
                         .password(encryptedPassword)
                         .birthday(data.birthday())
+                        .phone(data.phone())
                         .role(data.role())
                         .address(address)
                         .institution(institution)

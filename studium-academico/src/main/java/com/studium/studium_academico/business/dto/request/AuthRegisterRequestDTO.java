@@ -37,9 +37,6 @@ public record AuthRegisterRequestDTO(
 
         @Valid
         @NotNull(message = "O endereço é obrigatório")
-        AddressRequestDTO address,
-
-        @NotNull(message = "A instituição é obrigatória")
-        Institution institution
+        AddressRequestDTO address
 ) {
 }

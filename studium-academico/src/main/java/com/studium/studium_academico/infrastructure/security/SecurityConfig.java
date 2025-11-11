@@ -33,6 +33,7 @@ public class SecurityConfig {
                         // ROTAS PÚBLICAS
                         .requestMatchers("/auth/login").permitAll()
                         .requestMatchers("/auth/register").permitAll()
+                        .requestMatchers("/address/**").permitAll()
 
                         // DASHBOARD (todos autenticados)
                         .requestMatchers("/api/dashboard/**").authenticated()
