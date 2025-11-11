@@ -1,6 +1,7 @@
 package com.studium.studium_academico.controller;
 
 import com.studium.studium_academico.business.dto.request.AddressRequestDTO;
+import com.studium.studium_academico.business.dto.response.AddressResponseDTO;
 import com.studium.studium_academico.business.service.AddressService;
 import com.studium.studium_academico.infrastructure.entity.Address;
 import jakarta.validation.Valid;
@@ -20,19 +21,24 @@ public class AddressController {
     }
 
     @PostMapping
-    public ResponseEntity<Address> createAddress(@RequestBody AddressRequestDTO data) {
+    public ResponseEntity<AddressResponseDTO> createAddress(@RequestBody @Valid AddressRequestDTO data) {
         Address saved = service.create(data);
-        return ResponseEntity.status(201).body(saved);
+        AddressResponseDTO response = new AddressResponseDTO(saved);
+        return ResponseEntity.status(201).body(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Address> getAddress(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<AddressResponseDTO> getAddress(@PathVariable UUID id) {
+        Address address = service.findById(id);
+        AddressResponseDTO response = new AddressResponseDTO(address);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Address> updateAddress(@PathVariable UUID id, @RequestBody @Valid AddressRequestDTO data) {
-        return ResponseEntity.ok(service.update(id, data));
+    public ResponseEntity<AddressResponseDTO> updateAddress(@PathVariable UUID id, @RequestBody @Valid AddressRequestDTO data) {
+        Address updated = service.update(id, data);
+        AddressResponseDTO response = new AddressResponseDTO(updated);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
