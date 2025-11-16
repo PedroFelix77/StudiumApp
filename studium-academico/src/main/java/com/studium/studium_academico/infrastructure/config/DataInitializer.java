@@ -2,6 +2,7 @@
 
 package com.studium.studium_academico.infrastructure.config;
 
+import com.studium.studium_academico.business.dto.response.AddressResponseDTO;
 import com.studium.studium_academico.infrastructure.entity.Address;
 import com.studium.studium_academico.infrastructure.entity.Institution;
 import com.studium.studium_academico.business.dto.request.AddressRequestDTO;
@@ -39,7 +40,7 @@ public class DataInitializer {
                 "56506100"
         );
 
-        Address address = addressService.create(addressDTO);
+        Address address = addressService.createEntity(addressDTO);
 
         Institution institution = Institution.builder()
                 .name("Studium Academy")

@@ -25,5 +25,4 @@ public interface DepartmentRepository extends JpaRepository<Department, UUID> {
     @Query("SELECT d FROM Department d LEFT JOIN FETCH d.teachers LEFT JOIN FETCH d.courses WHERE d.id = :id")
     Optional<Department> findByIdWithTeachersAndCourses(@Param("id") UUID id);
 
-
 }
