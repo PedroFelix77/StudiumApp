@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public record AddressResponseDTO(
         UUID id,
-        String zipCode,
+        String cep,
         String street,
         String number,
         String city,

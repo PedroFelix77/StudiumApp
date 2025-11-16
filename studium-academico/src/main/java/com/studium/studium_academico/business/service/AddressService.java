@@ -20,18 +20,24 @@ public class AddressService {
     public AddressService(AddressRepository repository) {
         this.repository = repository;
     }
-
     @Transactional
-    public Address create(AddressRequestDTO data) {
-        Address address = new Address();
-        address.setCep(data.cep());
-        address.setStreet(data.street());
-        address.setNumber(data.number());
-        address.setCity(data.city());
-        address.setState(data.state());
-        address.setComplement(data.complement());
+    public Address createEntity(AddressRequestDTO data) {
+        Address address = Address.builder()
+                .cep(data.cep())
+                .street(data.street())
+                .number(data.number())
+                .complement(data.complement())
+                .city(data.city())
+                .state(data.state())
+                .build();
 
         return repository.save(address);
+    }
+
+    @Transactional
+    public AddressResponseDTO create(AddressRequestDTO data) {
+        Address address = createEntity(data);
+        return new AddressResponseDTO(address);
     }
 
     public List<AddressResponseDTO> findAll() {
@@ -41,27 +47,32 @@ public class AddressService {
                 .collect(Collectors.toList());
     }
 
-    public Address findById(UUID id) {
-        return repository.findById(id)
+    public AddressResponseDTO findById(UUID id) {
+        Address address = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Endereço não encontrado"));
+        return new AddressResponseDTO(address);
     }
 
     @Transactional
-    public Address update(UUID id, AddressRequestDTO data) {
-        Address address = findById(id);
+    public AddressResponseDTO update(UUID id, AddressRequestDTO data) {
+        Address address = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Endereço não encontrado"));
+
         address.setCep(data.cep());
         address.setStreet(data.street());
         address.setNumber(data.number());
+        address.setComplement(data.complement());
         address.setCity(data.city());
         address.setState(data.state());
-        address.setComplement(data.complement());
 
-        return repository.save(address);
+        Address updated = repository.save(address);
+        return new AddressResponseDTO(updated);
     }
 
     @Transactional
     public void delete(UUID id) {
-        Address address = repository.findById(id).orElseThrow(() -> new RuntimeException("Address not found"));
+        Address address = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Endereço não encontrado"));
         repository.delete(address);
     }
 

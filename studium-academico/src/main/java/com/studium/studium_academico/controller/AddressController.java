@@ -22,22 +22,19 @@ public class AddressController {
 
     @PostMapping
     public ResponseEntity<AddressResponseDTO> createAddress(@RequestBody @Valid AddressRequestDTO data) {
-        Address saved = service.create(data);
-        AddressResponseDTO response = new AddressResponseDTO(saved);
-        return ResponseEntity.status(201).body(response);
+        AddressResponseDTO response = service.create(data);
+        return ResponseEntity.status( HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AddressResponseDTO> getAddress(@PathVariable UUID id) {
-        Address address = service.findById(id);
-        AddressResponseDTO response = new AddressResponseDTO(address);
+        AddressResponseDTO response = service.findById(id);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<AddressResponseDTO> updateAddress(@PathVariable UUID id, @RequestBody @Valid AddressRequestDTO data) {
-        Address updated = service.update(id, data);
-        AddressResponseDTO response = new AddressResponseDTO(updated);
+        AddressResponseDTO response = service.update(id, data);
         return ResponseEntity.ok(response);
     }
 
