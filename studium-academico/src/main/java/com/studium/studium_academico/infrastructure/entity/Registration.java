@@ -22,15 +22,15 @@ public class Registration extends BaseEntity {
     private LocalDate dateRegistration;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private Student student;
 
     @ManyToOne
-    @JoinColumn(name = "course_id")
+    @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
     @ManyToOne
-    @JoinColumn(name = "class_id")
+    @JoinColumn(name = "class_id", nullable = false)
     private Classes classEntity;
 
     @OneToMany(mappedBy = "registration", fetch = FetchType.LAZY)

@@ -14,14 +14,18 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class Student extends BaseEntity{
+    @Column(unique = true, updatable = false)
+    private String registration;
+
+    private String responsibleName;
+    private String responsiblePhone;
 
     @OneToMany(mappedBy = "student",cascade = {CascadeType.PERSIST,  CascadeType.MERGE}, fetch = FetchType.LAZY)
     private List<Registration> registrations =  new ArrayList<>();
 
     @OneToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
 }

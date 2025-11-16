@@ -45,13 +45,13 @@ public class Users extends BaseEntity implements UserDetails {
     @JoinColumn(name = "institution_id",  nullable = false)
     private Institution institution;
 
-    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch =  FetchType.LAZY)
     private Student student;
 
-    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch =  FetchType.LAZY)
     private Teacher teacher;
 
-    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL,  fetch =  FetchType.LAZY)
     private Admin admin;
 
     @ManyToOne
