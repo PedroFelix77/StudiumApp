@@ -1,9 +1,7 @@
 package com.studium.studium_academico.controller;
 
 import com.studium.studium_academico.business.dto.request.AuthLoginRequestDTO;
-import com.studium.studium_academico.business.dto.request.AuthRegisterRequestDTO;
 import com.studium.studium_academico.business.dto.response.AuthLoginResponseDTO;
-import com.studium.studium_academico.business.dto.response.AuthRegisterResponseDTO;
 import com.studium.studium_academico.business.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,16 +39,5 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody @Valid AuthRegisterRequestDTO data) {
-        try {
-            AuthRegisterResponseDTO response = authService.register(data);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Erro ao registrar usuário: " + e.getMessage());
-        }
-    }
+
 }

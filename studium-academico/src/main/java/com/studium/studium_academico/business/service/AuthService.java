@@ -1,32 +1,23 @@
 package com.studium.studium_academico.business.service;
 
 import com.studium.studium_academico.business.dto.request.AuthLoginRequestDTO;
-import com.studium.studium_academico.business.dto.request.AuthRegisterRequestDTO;
 import com.studium.studium_academico.business.dto.response.AuthLoginResponseDTO;
-import com.studium.studium_academico.business.dto.response.AuthRegisterResponseDTO;
-import com.studium.studium_academico.infrastructure.entity.Address;
-import com.studium.studium_academico.infrastructure.entity.Institution;
-import com.studium.studium_academico.infrastructure.entity.Users;
+import com.studium.studium_academico.infrastructure.entity.*;
+import com.studium.studium_academico.infrastructure.repository.DepartmentRepository;
 import com.studium.studium_academico.infrastructure.repository.InstitutionRepository;
 import com.studium.studium_academico.infrastructure.repository.UsersRepository;
 import com.studium.studium_academico.infrastructure.security.TokenService;
 import jakarta.transaction.Transactional;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.MapReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
 
 @Service
 public class AuthService implements UserDetailsService {
@@ -43,6 +34,10 @@ public class AuthService implements UserDetailsService {
     @Autowired
     @Lazy
     AuthenticationManager authenticationManager;
+    @Autowired
+    RegistrationService registrationService;
+    @Autowired
+    DepartmentRepository deptRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -61,40 +56,5 @@ public class AuthService implements UserDetailsService {
         return new AuthLoginResponseDTO(token);
     }
 
-    @Transactional
-    public AuthRegisterResponseDTO register(AuthRegisterRequestDTO data) {
-        if (repository.findByEmail(data.email()) != null) {
-            throw new RuntimeException("Email já cadastrado");
-        }
 
-        if (repository.findByCpf(data.cpf()) != null){
-            throw new RuntimeException("CPF já cadastrado");
-        }
-        if (data.birthday().isAfter(LocalDate.now().minusYears(16))) {
-            throw new RuntimeException("Usuário deve ter pelo menos 16 anos");
-        }
-
-        Address address = addressService.create(data.address());
-
-        Institution institution = instRepository.findFirstByOrderByIdAsc()
-                .orElseThrow(() -> new RuntimeException("Nenhuma instituição encontrada"));
-
-        String encryptedPassword = passwordEncoder.encode(data.password());
-
-                Users user = Users.builder()
-                        .name(data.name())
-                        .cpf(data.cpf())
-                        .email(data.email())
-                        .password(encryptedPassword)
-                        .birthday(data.birthday())
-                        .phone(data.phone())
-                        .role(data.role())
-                        .address(address)
-                        .institution(institution)
-                        .build();
-
-                repository.save(user);
-
-                return new AuthRegisterResponseDTO(user.getName(), user.getEmail(), user.getRole());
-    }
 }
