@@ -73,6 +73,13 @@ public class Users extends BaseEntity implements UserDetails {
         if (this.role == UserRole.ADMIN) {
             return List.of(
                     new SimpleGrantedAuthority("ROLE_ADMIN"),
+                    new SimpleGrantedAuthority("ROLE_DIRECTOR"),
+                    new SimpleGrantedAuthority("ROLE_TEACHER"),
+                    new SimpleGrantedAuthority("ROLE_STUDENT")
+            );
+        } else if (this.role == UserRole.DIRECTOR) {
+            return List.of(
+                    new SimpleGrantedAuthority("ROLE_DIRECTOR"),
                     new SimpleGrantedAuthority("ROLE_TEACHER"),
                     new SimpleGrantedAuthority("ROLE_STUDENT")
             );
