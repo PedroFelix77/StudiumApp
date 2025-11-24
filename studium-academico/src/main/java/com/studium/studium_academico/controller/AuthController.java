@@ -1,43 +1,43 @@
 package com.studium.studium_academico.controller;
 
 import com.studium.studium_academico.business.dto.request.AuthLoginRequestDTO;
+import com.studium.studium_academico.business.dto.request.PasswordActivationDTO;
 import com.studium.studium_academico.business.dto.response.AuthLoginResponseDTO;
+import com.studium.studium_academico.business.service.ActivationService;
 import com.studium.studium_academico.business.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
+    private final ActivationService activationService;
 
-    private final AuthenticationManager authenticationManager;
-
-    public AuthController(AuthService authService, AuthenticationManager authenticationManager) {
+    public AuthController(AuthService authService, ActivationService activationService) {
         this.authService = authService;
-        this.authenticationManager = authenticationManager;
+        this.activationService = activationService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid AuthLoginRequestDTO data) {
-        try {
-            AuthLoginResponseDTO response = authService.login(data);
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Erro ao realizar login: " + e.getMessage());
-        }
+    public ResponseEntity<AuthLoginResponseDTO> login(@RequestBody @Valid AuthLoginRequestDTO data) {
+        return ResponseEntity.ok(authService.login(data));
     }
 
+    @PostMapping("/activate")
+    public ResponseEntity<String> activate(@RequestBody PasswordActivationDTO data) {
+        activationService.activateAccount(data.token(), data.newPassword());
+        return ResponseEntity.ok("Conta ativada com sucesso.");
+    }
+
+    @PostMapping("/resend/{email}")
+    public ResponseEntity<String> resend(@PathVariable String email){
+        activationService.resendActivationLink(email);
+        return ResponseEntity.ok("Novo link enviado com sucesso");
+    }
 
 }

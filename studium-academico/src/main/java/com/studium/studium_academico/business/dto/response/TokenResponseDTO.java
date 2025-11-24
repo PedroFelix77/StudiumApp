@@ -1,7 +1,8 @@
 package com.studium.studium_academico.business.dto.response;
 
-public record AuthLoginResponseDTO(
+public record TokenResponseDTO (
         String token,
-        UserResponseDTO user
-) {
+        String email,
+        String role
+){
 }
