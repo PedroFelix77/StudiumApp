@@ -26,8 +26,8 @@ public class Teacher extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
-    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<TeacherClass> teacherClasses = new ArrayList<>();
+    @OneToMany(mappedBy = "teacher", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Discipline> disciplines = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -39,4 +39,7 @@ public class Teacher extends BaseEntity {
 
     @OneToMany(mappedBy = "registeredByTeacher", fetch = FetchType.LAZY)
     private List<Frequency> registeredFrequencies = new ArrayList<>();
+
+    @OneToMany(mappedBy = "teacher", fetch = FetchType.LAZY)
+    private List<TeacherClass> teacherClasses = new ArrayList<>();
 }
