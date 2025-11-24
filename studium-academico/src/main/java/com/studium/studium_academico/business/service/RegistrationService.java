@@ -8,6 +8,7 @@ import com.studium.studium_academico.infrastructure.repository.ClassesRepository
 import com.studium.studium_academico.infrastructure.repository.CourseRepository;
 import com.studium.studium_academico.infrastructure.repository.RegistrationRepository;
 import com.studium.studium_academico.infrastructure.repository.StudentRepository;
+import com.studium.studium_academico.mapper.RegistrationMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,8 @@ public class RegistrationService {
     private StudentRepository studentRepository;
     @Autowired
     private ClassesRepository classesRepository;
+    @Autowired
+    private RegistrationMapper registrationMapper;
 
     @Transactional
     public RegistrationResponseDTO createRegistration(RegistrationRequestDTO data) {
@@ -60,7 +63,7 @@ public class RegistrationService {
                 .build();
 
         Registration saved = registrationRepository.save(registration);
-        return toResponseDTO(saved);
+        return registrationMapper.toResponseDTO(saved);
     }
 
     @Transactional
@@ -68,7 +71,7 @@ public class RegistrationService {
         Registration registration = registrationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Nenhum aluno encontrado"));
 
-        return toResponseDTO(registration);
+        return registrationMapper.toResponseDTO(registration);
     }
 
     @Transactional
@@ -76,13 +79,13 @@ public class RegistrationService {
         Registration registration = registrationRepository.findByRegistrationNumber(registrationNumber)
                 .orElseThrow(() -> new RuntimeException("Matrícula não encontrada"));
 
-        return toResponseDTO(registration);
+        return registrationMapper.toResponseDTO(registration);
     }
 
     public List<RegistrationResponseDTO> findAllRegistrations() {
         return registrationRepository.findAll()
                 .stream()
-                .map(this::toResponseDTO)
+                .map(registrationMapper::toResponseDTO)
                 .toList();
     }
 
@@ -91,7 +94,7 @@ public class RegistrationService {
 
         return registrationRepository.findByStudentId(studentId)
                 .stream()
-                .map(this::toResponseDTO)
+                .map(registrationMapper::toResponseDTO)
                 .toList();
     }
 
@@ -100,7 +103,7 @@ public class RegistrationService {
 
         return registrationRepository.findByCourseId(courseId)
                 .stream()
-                .map(this::toResponseDTO)
+                .map(registrationMapper::toResponseDTO)
                 .toList();
     }
 
@@ -109,7 +112,7 @@ public class RegistrationService {
 
         return registrationRepository.findByClassEntityId(classId)
                 .stream()
-                .map(this::toResponseDTO)
+                .map(registrationMapper::toResponseDTO)
                 .toList();
     }
 
@@ -152,7 +155,7 @@ public class RegistrationService {
         }
 
         Registration updated = registrationRepository.save(registration);
-        return toResponseDTO(updated);
+        return registrationMapper.toResponseDTO(updated);
     }
 
     @Transactional
@@ -168,7 +171,7 @@ public class RegistrationService {
         registrationRepository.delete(registration);
     }
 
-    // ✅ VALIDATE DELETION - Validar se pode excluir (para frontend)
+    // VALIDATE DELETION - Validar se pode excluir (para frontend)
     public RegistrationValidationResponseDTO validateDeletion(UUID id) {
         Registration registration = registrationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Matrícula não encontrada"));
@@ -218,17 +221,4 @@ public class RegistrationService {
         return "REG" + yearMonth + String.format("%04d", sequencial);
     }
 
-    private RegistrationResponseDTO toResponseDTO(Registration registration) {
-        return new RegistrationResponseDTO(
-                registration.getId(),
-                registration.getRegistrationNumber(),
-                registration.getDateRegistration(),
-                registration.getStudent().getId(),
-                registration.getStudent().getUser().getName(),
-                registration.getCourse().getId(),
-                registration.getCourse().getName(),
-                registration.getClassEntity().getId(),
-                registration.getClassEntity().getName()
-        );
-    }
 }
