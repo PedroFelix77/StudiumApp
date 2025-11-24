@@ -1,8 +1,6 @@
 package com.studium.studium_academico.infrastructure.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -27,5 +25,9 @@ public class ActivationToken extends BaseEntity {
 
     @Column(nullable = false)
     private boolean used = false;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users user;
 
 }
