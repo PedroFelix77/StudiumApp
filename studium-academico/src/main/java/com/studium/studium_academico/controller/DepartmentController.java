@@ -18,16 +18,18 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/departments")
 public class DepartmentController {
+
     @Autowired
     private DepartmentService departmentService;
 
     @PostMapping
-    public ResponseEntity<DepartmentResponseDTO> createDepartment(@RequestBody @Valid DepartmentRequestDTO data) {
+    public ResponseEntity<DepartmentResponseDTO> createDepartment(
+            @RequestBody @Valid DepartmentRequestDTO data) {
         DepartmentResponseDTO departmentResponseDTO = departmentService.createDepartment(data);
         return ResponseEntity.status(HttpStatus.CREATED).body(departmentResponseDTO);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping
     public ResponseEntity<List<DepartmentResponseDTO>> getAllDepartments() {
         List<DepartmentResponseDTO> departments = departmentService.getAllDepartments();
         return ResponseEntity.ok(departments);
@@ -40,13 +42,15 @@ public class DepartmentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DepartmentResponseDTO> updateDepartment(@PathVariable UUID id,@RequestBody @Valid DepartmentRequestDTO data) {
+    public ResponseEntity<DepartmentResponseDTO> updateDepartment(
+            @PathVariable UUID id,
+            @RequestBody @Valid DepartmentRequestDTO data) {
         DepartmentResponseDTO departmentResponseDTO = departmentService.updateDepartment(id, data);
-    return ResponseEntity.ok(departmentResponseDTO);
+        return ResponseEntity.ok(departmentResponseDTO);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<DepartmentResponseDTO> deleteDepartment(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteDepartment(@PathVariable UUID id) {
         departmentService.deleteDepartment(id);
         return ResponseEntity.noContent().build();
     }
@@ -57,3 +61,4 @@ public class DepartmentController {
         return ResponseEntity.ok(departments);
     }
 }
+
