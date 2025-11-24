@@ -25,6 +25,10 @@ public class TeacherClass extends BaseEntity {
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "discipline_id", nullable = false)
+    private Discipline discipline;
+
     private Integer weeklyHours;        // Horas semanais
     private Boolean isMainTeacher;
     private LocalDate startDate;
