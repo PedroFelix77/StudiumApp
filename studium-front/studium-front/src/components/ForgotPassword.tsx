@@ -17,6 +17,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+import { api } from "@/services/api";
+import { authService } from "@/services/api/auth";
+
 const forgotPasswordSchema = z.object({
   email: z
     .string()
@@ -29,6 +32,7 @@ type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 export function ForgotPassword() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [err, setErr] = useState("");
 
   const form = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -38,17 +42,19 @@ export function ForgotPassword() {
   const onSubmit = async (data: ForgotPasswordFormData) => {
     setIsSubmitting(true);
     setEmailSent(false);
+    setErr("");
 
     try {
-      // Aqui no futuro: integração com o endpoint /api/auth/recover
-      console.log("Simulando envio de e-mail para:", data.email);
-
-      // Simula atraso de envio
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await authService.resetPassword(data.email);
 
       setEmailSent(true);
-    } catch (error) {
-      console.error("Erro ao enviar e-mail:", error);
+    } catch (error: any) {
+      console.error(error);
+
+      setErr(
+        error.response?.data?.message ||
+        "Erro ao enviar e-mail. Tente novamente."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -77,7 +83,6 @@ export function ForgotPassword() {
           </DialogDescription>
         </DialogHeader>
 
-        {/* FORMULÁRIO */}
         {!emailSent ? (
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-4 items-center text-right gap-3">
@@ -97,15 +102,21 @@ export function ForgotPassword() {
               </p>
             )}
 
+            {err && (
+              <p className="text-sm text-red-600 text-center font-medium">
+                {err}
+              </p>
+            )}
+
             <DialogFooter className="mt-4 flex justify-end space-x-3">
               <DialogClose asChild>
                 <Button type="button" variant="destructive">
                   Voltar
                 </Button>
               </DialogClose>
+
               <Button
                 type="submit"
-                variant="default"
                 disabled={isSubmitting || !form.formState.isValid}
                 style={{ backgroundColor: "rgb(16, 70, 132)" }}
               >
@@ -114,14 +125,16 @@ export function ForgotPassword() {
             </DialogFooter>
           </form>
         ) : (
-          //MENSAGEM DE SUCESSO APÓS ENVIO
           <div className="text-center space-y-4 py-4">
             <p className="text-green-600 font-medium">
               Um link de redefinição foi enviado para o seu e-mail!
             </p>
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="default" style={{ backgroundColor: "rgb(16,70,132)" }}>
+                <Button
+                  variant="default"
+                  style={{ backgroundColor: "rgb(16,70,132)" }}
+                >
                   Voltar para o login
                 </Button>
               </DialogClose>
