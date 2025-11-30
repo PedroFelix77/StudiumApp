@@ -1,4 +1,4 @@
 export default function AdminDashboard() {
-    return <h1>Admin - dashboard</h1>;
-  }
-   // so para testar
+  return <h1>Admin - dashboard</h1>
+}
+// so para testar

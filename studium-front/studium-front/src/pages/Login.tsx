@@ -1,6 +1,4 @@
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,36 +6,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { ForgotPassword } from "@/components/ForgotPassword";
-import { useState } from "react";
-
-const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, "O e-mail é obrigatório")
-    .email("Digite um e-mail válido"),
-  senha: z
-    .string()
-    .min(6, "A senha deve ter pelo menos 6 caracteres")
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const { login } = useAuth(); //pega do context
+  const { login } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState(""); // <-- ok
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const form = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    mode: "onChange",
-  });
-
-  const onSubmit = async (data: LoginFormData) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsSubmitting(true);
     setError("");
 
     try {
-      await login({ email: data.email, senha: data.senha });
+      const loggedUser = await login({ email, password });
+
+      const role = loggedUser.role.toUpperCase();
+
+      navigate(`/${role.toLowerCase()}/dashboard`, { replace: true });
+
     } catch (err) {
       setError("Credenciais inválidas. Verifique e tente novamente.");
     } finally {
@@ -67,7 +57,7 @@ export default function Login() {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* E-MAIL */}
             <div>
               <Label
@@ -81,40 +71,32 @@ export default function Login() {
                 id="email"
                 type="email"
                 placeholder="exemplo@studium.edu.br"
-                {...form.register("email")}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="focus-visible:ring-[rgb(16,70,132)]"
               />
-              {form.formState.errors.email && (
-                <p className="text-sm text-red-600 mt-1">
-                  {form.formState.errors.email.message}
-                </p>
-              )}
             </div>
 
             {/* SENHA */}
             <div>
               <Label
-                htmlFor="senha"
+                htmlFor="password"
                 className="block mb-1 text-sm font-medium"
                 style={{ color: "rgb(8, 36, 66)" }}
               >
                 Senha
               </Label>
               <Input
-                id="senha"
+                id="password"
                 type="password"
                 placeholder="••••••••"
-                {...form.register("senha")}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="focus-visible:ring-[rgb(16,70,132)]"
               />
-              {form.formState.errors.senha && (
-                <p className="text-sm text-red-600 mt-1">
-                  {form.formState.errors.senha.message}
-                </p>
-              )}
             </div>
 
-            {/* ERRO GERAL */}
+            {/* ERRO */}
             {error && (
               <p
                 className="text-sm text-center font-medium"
@@ -124,23 +106,20 @@ export default function Login() {
               </p>
             )}
 
-            {/* BOTÃO LOGIN */}
+            {/* BOTÃO */}
             <Button
               type="submit"
-              disabled={isSubmitting || !form.formState.isValid}
+              disabled={isSubmitting}
               className="w-full font-semibold text-white transition-colors"
-              style={{
-                backgroundColor: "rgb(16, 70, 132)",
-              }}
+              style={{ backgroundColor: "rgb(16, 70, 132)" }}
             >
-              {isSubmitting ? (
+              {isSubmitting && (
                 <Loader2 className="animate-spin mr-2 h-4 w-4" />
-              ) : null}
+              )}
               {isSubmitting ? "Entrando..." : "Entrar"}
             </Button>
           </form>
 
-          {/* 👇 Forgot Password */}
           <ForgotPassword />
         </CardContent>
       </Card>
