@@ -1,39 +1,57 @@
 package com.studium.studium_academico.controller;
 
+import com.studium.studium_academico.business.dto.request.ForgotPasswordRequestDTO;
+import com.studium.studium_academico.business.dto.request.PasswordResetRequestDTO;
+import com.studium.studium_academico.business.dto.response.ForgotPasswordResponseDTO;
 import com.studium.studium_academico.business.service.PasswordResetService;
-import com.studium.studium_academico.infrastructure.entity.PasswordResetToken;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
+@Slf4j
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class PasswordResetController {
 
-    @Autowired
-    private PasswordResetService passwordResetService;
+    private final PasswordResetService passwordResetService;
 
-    @PostMapping("/request-reset")
-    public ResponseEntity<String> requestReset(@RequestParam String email) {
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ForgotPasswordResponseDTO> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequestDTO request) {
 
-        PasswordResetToken token = passwordResetService.generateResetToken(email);
+        var resetToken = passwordResetService.generateResetToken(request.email());
 
-        // Aqui futuramente você enviará o link por email
-        // Ex: https://seusite/reset-password?token=xxxxx
-
-        return ResponseEntity.ok("Token de reset gerado e enviado para o email.");
+        return ResponseEntity.ok(
+                new ForgotPasswordResponseDTO(
+                        "Um e-mail com instruções foi enviado.",
+                        null // o front não precisa do link, ele vem por e-mail
+                )
+        );
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(
-            @RequestParam String token,
-            @RequestParam String newPassword
-    ) {
-        passwordResetService.resetPassword(token, newPassword);
+            @Valid @RequestBody PasswordResetRequestDTO request) {
 
-        return ResponseEntity.ok("Senha redefinida com sucesso.");
+
+        passwordResetService.resetPassword(request.token(), request.newPassword());
+
+        return ResponseEntity.ok("Senha alterada com sucesso.");
+    }
+
+    @PostMapping("/resend-reset")
+    public ResponseEntity<String> resendReset(@RequestBody Map<String, String> body) {
+        String oldToken = body.get("token");
+
+        passwordResetService.resendResetToken(oldToken);
+
+        return  ResponseEntity.ok("Novo link de redefinição enviado");
     }
 }
+
