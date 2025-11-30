@@ -3,6 +3,7 @@ package com.studium.studium_academico.business.service;
 import com.studium.studium_academico.infrastructure.entity.ActivationToken;
 import com.studium.studium_academico.infrastructure.entity.EntityStatus;
 import com.studium.studium_academico.infrastructure.entity.Users;
+import com.studium.studium_academico.infrastructure.exceptions.TokenExpiredException;
 import com.studium.studium_academico.infrastructure.repository.ActivationTokenRepository;
 import com.studium.studium_academico.infrastructure.repository.UsersRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -32,6 +33,8 @@ public class ActivationService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private EmailService emailService;
+    @Value("${frontend.url}")
+    private String frontendUrl;
 
     @Transactional
     public void generateAndSendActivationLink(Users user) {
@@ -47,7 +50,7 @@ public class ActivationService {
 
         ActivationToken savedToken = tokenRepository.save(token);
 
-        String activationLink = "http://localhost:8080/api/auth/activate?token=" + savedToken.getToken();
+        String activationLink = frontendUrl + "/activate?token=" + savedToken.getToken();
         TransactionSynchronizationManager.registerSynchronization(
                 new TransactionSynchronization() {
                     @Override
@@ -82,7 +85,7 @@ public class ActivationService {
         }
 
         if (activationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Token expirado");
+            throw new TokenExpiredException("O token de ativação expirou");
         }
 
         Users user = activationToken.getUser();
@@ -119,17 +122,29 @@ public class ActivationService {
             throw new RuntimeException("A senha deve conter letras e números");
         }
     }
-
-    @Transactional
-    public void resendActivationLink(String email) {
+    @Transactional public void resendActivationLink(String email) {
         Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        if (user.getStatus() == EntityStatus.ACTIVE) {
+        if (user.getStatus() == EntityStatus.ACTIVE)
+        {
             throw new RuntimeException("Esta conta já está ativa");
         }
-
         generateAndSendActivationLink(user);
         log.info("Link de ativação reenviado para: {}", email);
+    }
+
+    @Transactional
+    public void resendActivationLinkByToken(String token) {
+        ActivationToken activationToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Token inválido"));
+
+        Users users = activationToken.getUser();
+
+        if (users.getStatus() == EntityStatus.ACTIVE) {
+            throw new RuntimeException("Esta conta já está ativa");
+        }
+        generateAndSendActivationLink(users);
+        log.info("Novo link de ativação enviado para: {}", users.getEmail());
     }
 }

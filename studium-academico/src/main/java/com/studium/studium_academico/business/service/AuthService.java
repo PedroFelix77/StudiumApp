@@ -40,20 +40,20 @@ public class AuthService implements UserDetailsService {
     }
 
 
-    public AuthLoginResponseDTO login(AuthLoginRequestDTO data){
-        Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(data.email(), data.password())
-        );
+        public AuthLoginResponseDTO login(AuthLoginRequestDTO data){
+            Authentication auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(data.email(), data.password())
+            );
 
-        Users user = (Users) auth.getPrincipal();
-        String token = tokenService.generateToken(user);
+            Users user = (Users) auth.getPrincipal();
+            String token = tokenService.generateToken(user);
 
-        UserResponseDTO responseUser = userMapper.toResponseDTO(user);
+            UserResponseDTO responseUser = userMapper.toResponseDTO(user);
 
-        return new AuthLoginResponseDTO(
-                token, responseUser
-        );
-    }
+            return new AuthLoginResponseDTO(
+                    token, responseUser
+            );
+        }
 
 
 }

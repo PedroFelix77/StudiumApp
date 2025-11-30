@@ -57,4 +57,30 @@ public class EmailService {
             log.error("[EMAIL] Erro ao tentar enviar confirmação de ativação para {}", email, e);
         }
     }
+
+    public void sendPasswordResetEmail(String email, String resetLink, String name) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(from);
+            message.setTo(email);
+            message.setSubject("Redefinição de senha - Studium");
+
+            message.setText(
+                    "Olá " + name + ",\n\n" +
+                            "Recebemos uma solicitação para redefinir sua senha.\n" +
+                            "Para continuar, clique no link abaixo:\n\n" +
+                            resetLink + "\n\n" +
+                            "Este link expira em 30 minutos.\n" +
+                            "Se você não solicitou a redefinição, ignore este e-mail."
+            );
+
+            mailSender.send(message);
+
+            log.info("[EMAIL] E-mail de redefinição de senha enviado para {}", email);
+
+        } catch (Exception e) {
+            log.error("[EMAIL] Erro ao tentar enviar e-mail de redefinição de senha para {}", email, e);
+        }
+    }
+
 }
