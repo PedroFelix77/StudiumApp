@@ -28,18 +28,21 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .csrf(csrf -> csrf.disable())
+                .cors(cors -> {})
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
                         // ROTAS PÚBLICAS
-                        .requestMatchers("/auth/login").permitAll()
-                        .requestMatchers("/auth/activate").permitAll()
-                        .requestMatchers("/api/admin/**").permitAll()
-                        .requestMatchers("/api/admins/**").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admins/**").hasRole("ADMIN")
 
 
                         // DASHBOARD (qualquer usuário autenticado)
-                        .requestMatchers("/api/dashboard/**").authenticated()
+                        .requestMatchers("/admin/dashboard/").hasRole("ADMIN")
+                        .requestMatchers("/director/dashboard/").hasRole("DIRECTOR")
+                        .requestMatchers("/teacher/dashboard/").hasRole("TEACHER")
+                        .requestMatchers("/student/dashboard/").hasRole("STUDENT")
 
 
                         // ADMIN — Cria DIRETORES
@@ -50,9 +53,9 @@ public class SecurityConfig {
 
 
                         // DIRECTOR — Cria TEACHERS e STUDENTS
-                        .requestMatchers(HttpMethod.POST, "/api/director/teachers/**")
+                        .requestMatchers(HttpMethod.POST, "/director/teachers/**")
                         .hasRole("DIRECTOR")
-                        .requestMatchers(HttpMethod.POST, "/api/director/students/**")
+                        .requestMatchers(HttpMethod.POST, "/director/students/**")
                         .hasRole("DIRECTOR")
 
                         // Director pode ver lista de teachers/students
@@ -114,7 +117,7 @@ public class SecurityConfig {
                         // Qualquer outra rota precisa estar autenticada
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(securityFilter, org.springframework.security.web.authentication.AnonymousAuthenticationFilter.class)
                 .build();
     }
 
