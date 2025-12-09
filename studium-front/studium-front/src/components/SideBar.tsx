@@ -23,37 +23,37 @@ export function Sidebar() {
     ],
 
     DIRECTOR: [
-      { label: "Dashboard", path: "/director/dashboard" },
-      { label: "Professores", path: "/director/drofessores" },
-      { label: "Alunos", path: "/director/alunos" },
-      { label: "Cursos", path: "/director/cursos" },
-      { label: "Departamentos", path: "/director/departamentos" },
-      { label: "Notas", path: "director/notas" },
-      { label: "Frequências", path: "director/frequencias" },
-      { label: "Relatórios", path: "director/relatorio" },
+      { label: "Dashboard", path: "/diretor/dashboard" },
+      { label: "Professores", path: "/diretor/professores" },
+      { label: "Alunos", path: "/diretor/alunos" },
+      { label: "Cursos", path: "/diretor/cursos" },
+      { label: "Departamentos", path: "/diretor/departamentos" },
+      { label: "Notas", path: "/diretor/notas" },
+      { label: "Frequências", path: "/diretor/frequencia" },
+      { label: "Relatórios", path: "/diretor/relatorios" },
     ],
 
     TEACHER: [
-      { label: "Dashboard", path: "/teacher/dashboard" },
-      { label: "Alunos", path: "/teacher/alunos" },
-      { label: "Cursos", path: "/teacher/cursos" },
-      { label: "Notas", path: "/teacher/notas" },
-      { label: "Frequências", path: "/teacher/frequencias" },
+      { label: "Dashboard", path: "/professor/dashboard" },
+      { label: "Alunos", path: "/professor/alunos" },
+      { label: "Cursos", path: "/professor/cursos" },
+      { label: "Notas", path: "/professor/notas" },
+      { label: "Frequências", path: "/professor/frequencias" },
     ],
 
     STUDENT: [
-      { label: "Dashboard", path: "/student/dashboard" },
-      { label: "Curso", path: "/student/cursos" },
-      { label: "Notas", path: "/student/notas" },
-      { label: "Frequências", path: "/student/frequencias" },
+      { label: "Dashboard", path: "/aluno/dashboard" },
+      { label: "Curso", path: "/aluno/curso" },
+      { label: "Notas", path: "/aluno/notas" },
+      { label: "Frequências", path: "/aluno/frequencias" },
     ],
   };
 
   const menuItems = MENU[role];
 
   return (
-    <aside className="w-64 bg-white shadow-sm border-r">
-      <div className="p-4 text-xl font-bold">Studium</div>
+    <aside className="w-64 bg-[#0F172A] shadow-sm border-r border-[#0891B2]/20">
+      <div className="p-4 text-xl font-bold text-[#E5E7EB]">Studium</div>
 
       <nav className="mt-4 flex flex-col">
         {menuItems.map((item) => (
@@ -61,8 +61,8 @@ export function Sidebar() {
             key={item.path}
             to={item.path}
             className={cn(
-              "px-4 py-3 hover:bg-gray-100",
-              location.pathname === item.path && "bg-gray-200 font-semibold"
+              "px-4 py-3 text-[#E5E7EB] hover:bg-[#0891B2]/20 transition-colors",
+              location.pathname === item.path && "bg-[#0891B2] text-white font-semibold"
             )}
           >
             {item.label}

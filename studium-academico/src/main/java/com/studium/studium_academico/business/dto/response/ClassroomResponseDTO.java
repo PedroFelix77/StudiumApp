@@ -1,14 +1,12 @@
 package com.studium.studium_academico.business.dto.response;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 
 public record ClassroomResponseDTO(
         UUID id,
-        String name,
-        String location,
-        Integer capacity,
-        LocalDateTime startTime,
-        LocalDateTime endTime,
-        UUID classId
+        LocalDate date,
+        String content,
+        ClassResponseDTO classEntity,
+        DisciplineResponseDTO discipline
 ) {}

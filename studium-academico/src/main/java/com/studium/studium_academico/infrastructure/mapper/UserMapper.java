@@ -1,4 +1,4 @@
-package com.studium.studium_academico.mapper;
+package com.studium.studium_academico.infrastructure.mapper;
 
 import com.studium.studium_academico.business.dto.request.UserRequestDTO;
 import com.studium.studium_academico.business.dto.response.UserResponseDTO;

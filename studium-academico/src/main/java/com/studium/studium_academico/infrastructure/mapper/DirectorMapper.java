@@ -1,4 +1,4 @@
-package com.studium.studium_academico.mapper;
+package com.studium.studium_academico.infrastructure.mapper;
 
 import com.studium.studium_academico.business.dto.response.DirectorResponseDTO;
 import com.studium.studium_academico.infrastructure.entity.Director;

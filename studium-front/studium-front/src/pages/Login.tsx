@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { ForgotPassword } from "@/components/ForgotPassword";
 import { useNavigate } from "react-router-dom";
+import { getRolePath } from "@/lib/utils";
 
 export default function Login() {
   const { login } = useAuth();
@@ -24,9 +25,8 @@ export default function Login() {
     try {
       const loggedUser = await login({ email, password });
 
-      const role = loggedUser.role.toUpperCase();
-
-      navigate(`/${role.toLowerCase()}/dashboard`, { replace: true });
+      const path = getRolePath(loggedUser.role);
+      navigate(`/${path}/dashboard`, { replace: true });
 
     } catch (err) {
       setError("Credenciais inválidas. Verifique e tente novamente.");

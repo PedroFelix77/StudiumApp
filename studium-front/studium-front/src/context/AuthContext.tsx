@@ -1,10 +1,10 @@
 import { createContext, useContext, type ReactNode } from "react";
-import { useAuthProvider } from "./useAuthProvider";
+import { useAuthProvider, type User } from "./useAuthProvider";
 
 interface AuthContextType {
   user: ReturnType<typeof useAuthProvider>["user"];
   isAuthenticated: boolean;
-  login: (c: { email: string; senha: string }) => Promise<void>;
+  login: (c: { email: string; password: string }) => Promise<User>;
   logout: () => void;
 }
 

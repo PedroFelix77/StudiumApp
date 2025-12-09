@@ -15,6 +15,8 @@ import java.util.List;
 @Setter
 public class Classroom extends BaseEntity {
 
+    private String code;
+    private String name;
     @Column(nullable = false)
     private LocalDate date;
     @Column(nullable = false)

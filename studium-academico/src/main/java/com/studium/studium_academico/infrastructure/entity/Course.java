@@ -12,15 +12,13 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-
 public class Course extends BaseEntity {
 
     @Column(name = "name")
     private String name;
 
     @Column(name = "code_course")
-    private String code_course;
+    private String codeCourse;
 
     @ManyToOne
     @JoinColumn(name = "department_id")

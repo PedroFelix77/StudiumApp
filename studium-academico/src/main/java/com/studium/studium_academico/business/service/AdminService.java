@@ -10,7 +10,7 @@ import com.studium.studium_academico.infrastructure.entity.UserRole;
 import com.studium.studium_academico.infrastructure.entity.Users;
 import com.studium.studium_academico.infrastructure.repository.AdminRepository;
 import com.studium.studium_academico.infrastructure.repository.DirectorRepository;
-import com.studium.studium_academico.mapper.DirectorMapper;
+import com.studium.studium_academico.infrastructure.mapper.DirectorMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,6 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class AdminService {
 
     @Autowired

@@ -2,11 +2,9 @@ package com.studium.studium_academico.business.service;
 
 import com.studium.studium_academico.business.dto.request.AuthLoginRequestDTO;
 import com.studium.studium_academico.business.dto.response.AuthLoginResponseDTO;
-import com.studium.studium_academico.business.dto.response.UserResponseDTO;
 import com.studium.studium_academico.infrastructure.entity.Users;
 import com.studium.studium_academico.infrastructure.security.TokenService;
-import com.studium.studium_academico.infrastructure.repository.UsersRepository;
-import com.studium.studium_academico.mapper.UserMapper;
+import com.studium.studium_academico.infrastructure.mapper.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;

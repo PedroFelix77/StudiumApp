@@ -6,7 +6,7 @@ import com.studium.studium_academico.business.dto.response.DirectorResponseDTO;
 import com.studium.studium_academico.infrastructure.entity.UserRole;
 import com.studium.studium_academico.infrastructure.entity.Users;
 import com.studium.studium_academico.infrastructure.repository.DirectorRepository;
-import com.studium.studium_academico.mapper.UserMapper;
+import com.studium.studium_academico.infrastructure.mapper.DirectorMapper; // ADICIONE ESTA LINHA
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -20,15 +20,16 @@ import static org.mockito.Mockito.*;
 class AdminServiceTest {
 
     @InjectMocks
-    private com.studium.studium_academico.business.service.AdminService adminService;
+    private AdminService adminService;
 
-    @Mock private com.studium.studium_academico.business.service.UserService userService;
+    @Mock private UserService userService;
     @Mock private DirectorRepository directorRepository;
-    @Mock private UserMapper userMapper;
-
+    @Mock private DirectorMapper directorMapper; // ADICIONE ESTA LINHA
 
     @BeforeEach
-    void setup() { MockitoAnnotations.openMocks(this); }
+    void setup() {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @Test
     void createDirectorShouldReturnDto_whenOk() {
@@ -51,11 +52,29 @@ class AdminServiceTest {
         userEntity.setId(userResp.id());
         userEntity.setName(userResp.name());
         userEntity.setEmail(userResp.email());
+        userEntity.setCpf("11122233344"); // ADICIONE CPF PARA O TESTE
 
         when(userService.findById(userResp.id())).thenReturn(userEntity);
 
-        // save director returns an entity — we can return same director via repository mock
-        when(directorRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        // Cria um objeto Director mock
+        com.studium.studium_academico.infrastructure.entity.Director directorEntity =
+                com.studium.studium_academico.infrastructure.entity.Director.builder()
+                        .user(userEntity)
+                        .hireDate(request.hireDate())
+                        .build();
+
+        when(directorRepository.save(any())).thenReturn(directorEntity);
+
+        // Cria o response DTO esperado
+        DirectorResponseDTO expectedResponse = new DirectorResponseDTO(
+                directorEntity.getId(),
+                "João",
+                "11122233344",
+                "joao@studium.com"
+        );
+
+        // CONFIGURE O MOCK DO DIRECTOR MAPPER
+        when(directorMapper.toResponseDTO(any())).thenReturn(expectedResponse);
 
         DirectorResponseDTO res = adminService.createDirector(request);
 
@@ -63,5 +82,7 @@ class AdminServiceTest {
         assertThat(res.name()).isEqualTo("João");
         verify(userService, times(1)).createUser(any(), any(), any());
         verify(directorRepository, times(1)).save(any());
+        // VERIFIQUE SE O MAPPER FOI CHAMADO
+        verify(directorMapper, times(1)).toResponseDTO(any());
     }
 }

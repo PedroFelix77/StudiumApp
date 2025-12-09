@@ -5,7 +5,7 @@ import java.util.UUID;
 public record ClassResponseDTO(
         UUID id,
         String name,
-        String code_class,
+        String codeClass,
         String academicYear,
         UUID courseId,
         String courseName

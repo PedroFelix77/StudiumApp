@@ -24,11 +24,11 @@ public class Grade extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "registration_id", nullable = false)
-    private Registration registrationStudent;
+    private Registration registration;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recorded_by_teacher_id")
-    private Teacher recordedByTeacher;
+    private Teacher teacher;
 
     @ManyToOne
     @JoinColumn(name = "discipline_id")
@@ -36,7 +36,7 @@ public class Grade extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "class_id")
-    private Classes classGrade;
+    private Classes classEntity;
 
 }
 

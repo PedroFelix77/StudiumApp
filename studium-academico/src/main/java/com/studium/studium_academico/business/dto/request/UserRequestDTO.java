@@ -16,6 +16,6 @@ public record UserRequestDTO(
         @NotBlank @Email String email,
         @NotNull LocalDate birthday,
         @NotBlank String phone,
-        @NotNull UUID institutionId
+        UUID institutionId
 ) {
 }

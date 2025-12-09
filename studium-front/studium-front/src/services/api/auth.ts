@@ -1,4 +1,3 @@
-import { email } from "zod";
 import { api } from "../api";
 
 export const authService = {

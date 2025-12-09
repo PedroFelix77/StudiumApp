@@ -1,16 +1,14 @@
 package com.studium.studium_academico.business.service;
 
-import com.studium.studium_academico.business.dto.request.AddressRequestDTO;
 import com.studium.studium_academico.business.dto.request.CreateStudentRequestDTO;
 import com.studium.studium_academico.business.dto.request.CreateTeacherRequestDTO;
-import com.studium.studium_academico.business.dto.request.UserRequestDTO;
 import com.studium.studium_academico.business.dto.response.StudentResponseDTO;
 import com.studium.studium_academico.business.dto.response.TeacherResponseDTO;
 import com.studium.studium_academico.business.dto.response.UserResponseDTO;
 import com.studium.studium_academico.infrastructure.entity.*;
 import com.studium.studium_academico.infrastructure.repository.*;
-import com.studium.studium_academico.mapper.StudentMapper;
-import com.studium.studium_academico.mapper.TeacherMapper;
+import com.studium.studium_academico.infrastructure.mapper.StudentMapper;
+import com.studium.studium_academico.infrastructure.mapper.TeacherMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

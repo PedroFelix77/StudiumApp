@@ -17,7 +17,7 @@ public class Classes extends BaseEntity {
     @Column(name = "name",  nullable = false)
     private String name;
     @Column(name = "code_class",  nullable = false)
-    private String code_class;
+    private String codeClass;
     @Column(name = "academicYear",   nullable = false)
     private String academicYear;
 

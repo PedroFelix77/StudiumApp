@@ -9,6 +9,6 @@ public record DisciplineResponseDTO(
         String code,
         Integer workload,
         CourseResponseDTO course,
-        TeacherResponseDTO teacher, // ✅ Agora é um único teacher
+        TeacherResponseDTO teacher,
         List<ClassResponseDTO> classes
 ) {}

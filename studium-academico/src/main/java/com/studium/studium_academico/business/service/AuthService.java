@@ -4,12 +4,9 @@ import com.studium.studium_academico.business.dto.request.AuthLoginRequestDTO;
 import com.studium.studium_academico.business.dto.response.AuthLoginResponseDTO;
 import com.studium.studium_academico.business.dto.response.UserResponseDTO;
 import com.studium.studium_academico.infrastructure.entity.*;
-import com.studium.studium_academico.infrastructure.repository.DepartmentRepository;
-import com.studium.studium_academico.infrastructure.repository.InstitutionRepository;
 import com.studium.studium_academico.infrastructure.repository.UsersRepository;
 import com.studium.studium_academico.infrastructure.security.TokenService;
-import com.studium.studium_academico.mapper.UserMapper;
-import jakarta.transaction.Transactional;
+import com.studium.studium_academico.infrastructure.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,7 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service

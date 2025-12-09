@@ -6,10 +6,9 @@ import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
 public record DisciplineRequestDTO(
-        @NotBlank String name,
-        @NotBlank String code,
-        String description,
+        String name,
+        String code,
         Integer workload,
-        @NotNull UUID courseId,
-        UUID teacherId // ✅ Opcional - pode ser null
+        UUID courseId,
+        UUID teacherId
 ) {}

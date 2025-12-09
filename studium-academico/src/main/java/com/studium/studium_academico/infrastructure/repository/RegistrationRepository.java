@@ -36,9 +36,23 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
     // Contar matrículas por aluno
     Long countByStudentId(UUID studentId);
 
-    // Contar matrículas por curso
-    Long countByCourseId(UUID courseId);
-
     // Contar matrículas por turma
     Long countByClassEntityId(UUID classId);
+
+    @Query("""
+    SELECT COUNT(DISTINCT r.id)
+    FROM Registration r
+    JOIN r.classEntity ce
+    WHERE ce.teacherClasses.size = :teacherId
+""")
+    long countByTeacherId(UUID teacherId);
+
+    @Query("""
+    SELECT COUNT(r)
+    FROM Registration r
+    WHERE r.course.id = :courseId
+""")
+    long countByCourseId(UUID courseId);
+
+
 }

@@ -41,6 +41,8 @@ import DepartamentoAdmin from "@/pages/admin/Departamentos";
 import DiretorDepartamentos from "@/pages/diretor/Departamentos";
 import DiretorFrequencias from "@/pages/diretor/Frequencias";
 import DiretorNotas from "@/pages/diretor/Notas";
+import DirectorDashboard from "@/components/dashboard/DirectorDashboard";
+import StudentDashboard from "@/components/dashboard/StudentDashboard";
 
 export function AppRoutes() {
   return (
@@ -58,14 +60,7 @@ export function AppRoutes() {
 
 
           {/* ADMIN */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute allowedRoles={["ADMIN"]}>
-                <AppLayout />
-              </ProtectedRoute>
-            }
-          >
+          <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><AppLayout /></ProtectedRoute>}>
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="alunos" element={<AdminAlunos />} />
             <Route path="professores" element={<AdminProfessores />} />
@@ -76,16 +71,21 @@ export function AppRoutes() {
             <Route path="relatorios" element={<AdminRelatorios />} />
           </Route>
 
+          {/* DIRETOR */}
+          <Route path="/director" element={<ProtectedRoute allowedRoles={['DIRECTOR']}><AppLayout /></ProtectedRoute>}>
+            <Route path="dashboard" element={<DirectorDashboard />} />
+            <Route path="professores" element={<DiretorProfessores />} />
+            <Route path="alunos" element={<DiretorAlunos />} />
+            <Route path="cursos" element={<DiretorCursos />} />
+            <Route path="departamentos" element={<DiretorDepartamentos />} />
+            <Route path="frequencias" element={<DiretorFrequencias />} />
+            <Route path="notas" element={<DiretorNotas />} />
+            <Route path="relatorios" element={<DiretorRelatorios />} />
+          </Route>
+
           {/* PROFESSOR */}
-          <Route
-            path="/professor"
-            element={
-              <ProtectedRoute allowedRoles={["TEACHER"]}>
-                <AppLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="dashboard" element={<ProfDashboard />} />
+          <Route path="/professor" element={<ProtectedRoute allowedRoles={['TEACHER']}><AppLayout /></ProtectedRoute>}>
+            <Route path="dashboard" element={<TeacherDashboard />} />
             <Route path="alunos" element={<ProfAlunos />} />
             <Route path="cursos" element={<ProfCursos />} />
             <Route path="frequencias" element={<ProfFrequencias />} />
@@ -93,37 +93,11 @@ export function AppRoutes() {
           </Route>
 
           {/* ALUNO */}
-          <Route
-            path="/aluno"
-            element={
-              <ProtectedRoute allowedRoles={["STUDENT"]}>
-                <AppLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="dashboard" element={<AlunoDashboard />} />
+          <Route path="/aluno" element={<ProtectedRoute allowedRoles={['STUDENT']}><AppLayout /></ProtectedRoute>}>
+            <Route path="dashboard" element={<StudentDashboard />} />
             <Route path="curso" element={<AlunoCurso />} />
             <Route path="notas" element={<AlunoNotas />} />
-            <Route path="frequencias" element={<AlunoFrequencia />} />
-          </Route>
-
-          {/* DIRETOR */}
-          <Route
-            path="/diretor"
-            element={
-              <ProtectedRoute allowedRoles={["DIRECTOR"]}>
-                <AppLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="dashboard" element={<DiretorDashboard />} />
-            <Route path="professores" element={<DiretorProfessores />} />
-            <Route path="departamentos" element={<DiretorDepartamentos />} />
-            <Route path="frequencia" element={<DiretorFrequencias />} />
-            <Route path="notas" element={<DiretorNotas />} />
-            <Route path="alunos" element={<DiretorAlunos />} />
-            <Route path="cursos" element={<DiretorCursos />} />
-            <Route path="relatorios" element={<DiretorRelatorios />} />
+            <Route path="frequencia" element={<AlunoFrequencia />} />
           </Route>
 
         </Routes>

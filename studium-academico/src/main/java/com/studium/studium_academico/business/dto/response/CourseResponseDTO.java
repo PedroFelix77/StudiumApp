@@ -7,11 +7,9 @@ public record CourseResponseDTO(
         UUID id,
         String name,
         String code_course,
-        DepartmentResponseDTO department,
-        InstitutionResponseDTO institution,
-        List<DisciplineResponseDTO> disciplines,
-        List<ClassResponseDTO> classes,
-        List<RegistrationResponseDTO> registrations,
-        List<TeacherResponseDTO> teachers
+        UUID departmentId,
+        String departmentName,
+        UUID institutionId,
+        String institutionName
 ) {
 }

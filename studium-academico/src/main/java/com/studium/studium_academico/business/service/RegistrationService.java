@@ -8,13 +8,12 @@ import com.studium.studium_academico.infrastructure.repository.ClassesRepository
 import com.studium.studium_academico.infrastructure.repository.CourseRepository;
 import com.studium.studium_academico.infrastructure.repository.RegistrationRepository;
 import com.studium.studium_academico.infrastructure.repository.StudentRepository;
-import com.studium.studium_academico.mapper.RegistrationMapper;
+import com.studium.studium_academico.infrastructure.mapper.RegistrationMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

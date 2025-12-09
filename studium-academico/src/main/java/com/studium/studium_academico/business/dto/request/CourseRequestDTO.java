@@ -8,6 +8,7 @@ import java.util.UUID;
 public record CourseRequestDTO(
         @NotBlank String name,
         @NotBlank String code_course,
-        @NotNull UUID departmentId
+        UUID departmentId,
+        UUID institutionId
 ) {
 }
