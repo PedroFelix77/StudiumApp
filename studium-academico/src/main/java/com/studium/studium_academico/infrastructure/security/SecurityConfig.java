@@ -51,20 +51,64 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/admin/directors/**")
                         .hasRole("ADMIN")
 
+                        // TURMAS (CLASSES)
+                        .requestMatchers(HttpMethod.POST, "/api/classes/**")
+                        .hasAnyRole("DIRECTOR", "ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/classes/**")
+                        .hasAnyRole("DIRECTOR", "ADMIN", "TEACHER")
+
+                        .requestMatchers(HttpMethod.PUT, "/api/classes/**")
+                        .hasAnyRole("DIRECTOR", "ADMIN")
+
+                        .requestMatchers(HttpMethod.DELETE, "/api/classes/**")
+                        .hasAnyRole("DIRECTOR", "ADMIN")
+
+                        // MATRÍCULAS (REGISTRATIONS)
+                        .requestMatchers(HttpMethod.POST, "/registrations/**")
+                        .hasAnyRole("DIRECTOR", "ADMIN")
+
+                        .requestMatchers(HttpMethod.PUT, "/registrations/**")
+                        .hasAnyRole("DIRECTOR", "ADMIN")
+
+                        .requestMatchers(HttpMethod.DELETE, "/registrations/**")
+                        .hasAnyRole("DIRECTOR", "ADMIN")
+
+                        // READ matrícula (listar, por aluno, curso, turma, contagens)
+                        .requestMatchers(HttpMethod.GET, "/registrations/**")
+                        .hasAnyRole("DIRECTOR", "TEACHER", "STUDENT", "ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/registrations/class/*/students")
+                        .hasAnyRole("DIRECTOR", "TEACHER", "ADMIN")
 
                         // DIRECTOR — Cria TEACHERS e STUDENTS
-                        .requestMatchers(HttpMethod.POST, "/director/teachers/**")
+                        .requestMatchers(HttpMethod.POST, "/api/director/teachers")
                         .hasRole("DIRECTOR")
-                        .requestMatchers(HttpMethod.POST, "/director/students/**")
+
+                        .requestMatchers(HttpMethod.POST, "/api/director/students")
                         .hasRole("DIRECTOR")
+
+                        .requestMatchers(HttpMethod.GET, "/api/director/**")
+                        .hasAuthority("DIRECTOR")
 
                         // Director pode ver lista de teachers/students
-                        .requestMatchers(HttpMethod.GET, "/api/director/teachers/**")
+                        .requestMatchers(HttpMethod.GET, "/director/teachers/**")
                         .hasRole("DIRECTOR")
-                        .requestMatchers(HttpMethod.GET, "/api/director/students/**")
+                        .requestMatchers(HttpMethod.GET, "/director/students/**")
                         .hasRole("DIRECTOR")
 
+                                // DEPARTMENTs
+                        .requestMatchers(HttpMethod.POST, "/api/departments/**")
+                        .hasRole("DIRECTOR")
 
+                        .requestMatchers(HttpMethod.PUT, "/api/departments/**")
+                        .hasRole("DIRECTOR")
+
+                        .requestMatchers(HttpMethod.DELETE, "/api/departments/**")
+                        .hasRole("DIRECTOR")
+
+                        .requestMatchers(HttpMethod.GET, "/api/departments/**")
+                        .hasAnyRole("DIRECTOR", "TEACHER")
                         // PROFESSORES
                         // Teachers podem acessar alunos e grades/frequências
                         .requestMatchers(HttpMethod.GET, "/api/teachers/**")
@@ -84,7 +128,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/courses/**")
                         .hasAnyRole("DIRECTOR", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/courses/**")
-                        .hasAnyRole("ADMIN")
+                        .hasAnyRole("ADMIN", "DIRECTOR")
 
 
                         // Frequências

@@ -23,14 +23,14 @@ export function Sidebar() {
     ],
 
     DIRECTOR: [
-      { label: "Dashboard", path: "/diretor/dashboard" },
-      { label: "Professores", path: "/diretor/professores" },
-      { label: "Alunos", path: "/diretor/alunos" },
-      { label: "Cursos", path: "/diretor/cursos" },
-      { label: "Departamentos", path: "/diretor/departamentos" },
-      { label: "Notas", path: "/diretor/notas" },
-      { label: "Frequências", path: "/diretor/frequencia" },
-      { label: "Relatórios", path: "/diretor/relatorios" },
+      { label: "Dashboard", path: "/director/dashboard" },
+      { label: "Professores", path: "/director/professores" },
+      { label: "Alunos", path: "/director/alunos" },
+      { label: "Cursos", path: "/director/cursos" },
+      { label: "Departamentos", path: "/director/departamentos" },
+      { label: "Notas", path: "/director/notas" },
+      { label: "Frequências", path: "/director/frequencias" },
+      { label: "Relatórios", path: "/director/relatorios" },
     ],
 
     TEACHER: [

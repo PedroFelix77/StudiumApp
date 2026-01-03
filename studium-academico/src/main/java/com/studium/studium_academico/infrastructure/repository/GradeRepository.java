@@ -1,7 +1,6 @@
 package com.studium.studium_academico.infrastructure.repository;
 
 import com.studium.studium_academico.infrastructure.entity.Grade;
-import com.studium.studium_academico.infrastructure.entity.Registration;
 import com.studium.studium_academico.infrastructure.entity.TypeGrade;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -16,48 +15,57 @@ import java.util.UUID;
 
 @Repository
 public interface GradeRepository extends JpaRepository<Grade, UUID>, JpaSpecificationExecutor<Grade> {
-    // Encontrar notas de um aluno por disciplina/turma
+
+    // Encontrar notas por registrationId
     @Query("SELECT g FROM Grade g WHERE g.registration.id = :registrationId")
     List<Grade> findByRegistrationId(@Param("registrationId") UUID registrationId);
 
-    Long countByRegistrationStudentIdAndGradeIsNull(UUID studentId);
+    // Contar notas nulas por studentId (via registration)
     @Query("""
-    SELECT AVG(g.grade)
-    FROM Grade g
-    WHERE g.registration.course.id = :courseId
-""")
+        SELECT COUNT(g) FROM Grade g WHERE g.registration.student.id = :studentId AND g.grade IS NULL
+    """)
+    Long countByStudentIdAndGradeIsNull(@Param("studentId") UUID studentId);
+
+    // Média de notas por curso
+    @Query("SELECT AVG(g.grade) FROM Grade g WHERE g.registration.course.id = :courseId")
     Optional<Double> findAverageGradeByCourseId(UUID courseId);
 
-    @Query("""
-    SELECT AVG(g.grade)
-    FROM Grade g
-    WHERE g.registration.course.id = :courseId
-      AND g.registration.student.id = :studentId
-""")
+    // Média de notas por curso e aluno
+    @Query("SELECT AVG(g.grade) FROM Grade g WHERE g.registration.course.id = :courseId AND g.registration.student.id = :studentId")
     Optional<Double> findAverageGradeByCourseIdAndStudentId(UUID courseId, UUID studentId);
 
-    @Query("""
-    SELECT AVG(g.grade)
-    FROM Grade g
-    WHERE g.registration.course.id = :courseId
-      AND g.teacher.id = :teacherId
-""")
+    // Média de notas por curso e professor
+    @Query("SELECT AVG(g.grade) FROM Grade g WHERE g.registration.course.id = :courseId AND g.teacher.id = :teacherId")
     Optional<Double> findAverageGradeByCourseIdAndTeacherId(UUID courseId, UUID teacherId);
 
+    // Buscar por registrationId e tipo de prova
+    @Query("SELECT g FROM Grade g WHERE g.registration.id = :registrationId AND g.typeGrade = :typeGrade")
+    Optional<Grade> findByRegistrationIdAndTypeGrade(@Param("registrationId") UUID registrationId, @Param("typeGrade") TypeGrade typeGrade);
 
-
-
-    // Buscar por registro + tipo de prova
-    Optional<Grade> findByRegistrationStudentIdAndTypeGrade(UUID registrationId, TypeGrade typeGrade);
-
-    // Contagens/estatísticas simples
+    // Média por disciplina
     @Query("SELECT AVG(g.grade) FROM Grade g WHERE g.discipline.id = :disciplineId")
     BigDecimal averageByDiscipline(@Param("disciplineId") UUID disciplineId);
 
-    List<Grade> findByRecordedByTeacherId(UUID teacherId);
+    // Notas lançadas por um professor
+    @Query("SELECT g FROM Grade g WHERE g.teacher.id = :teacherId")
+    List<Grade> findByTeacherId(@Param("teacherId") UUID teacherId);
 
-    List<Registration> findByStudentId(UUID studentId);
-    List<Registration> findByClassEntityId(UUID classId);
-    List<Registration> findByCourseId(UUID courseId);
-    Optional<Registration> findByRegistrationNumber(String registrationNumber);
+    // Notas por aluno (studentId) - via registration
+    @Query("SELECT g FROM Grade g WHERE g.registration.student.id = :studentId")
+    List<Grade> findByStudentId(@Param("studentId") UUID studentId);
+
+    // Notas por turma (classId)
+    @Query("SELECT g FROM Grade g WHERE g.classEntity.id = :classId")
+    List<Grade> findByClassEntityId(@Param("classId") UUID classId);
+
+    // Notas por curso (courseId) - via registration
+    @Query("SELECT g FROM Grade g WHERE g.registration.course.id = :courseId")
+    List<Grade> findByCourseId(@Param("courseId") UUID courseId);
+
+    // Buscar por registrationNumber - via registration
+    @Query("SELECT g FROM Grade g WHERE g.registration.registrationNumber = :registrationNumber")
+    List<Grade> findByRegistrationNumber(@Param("registrationNumber") String registrationNumber);
+
+
+
 }

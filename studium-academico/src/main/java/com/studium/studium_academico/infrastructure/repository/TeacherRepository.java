@@ -45,7 +45,7 @@ public interface TeacherRepository extends JpaRepository<Teacher, UUID> {
 
     // Buscar professores ativos
     @Query("SELECT t FROM Teacher t WHERE t.status = 'ACTIVE'")
-    List<Teacher> findActiveTeachers();
+    Long findActiveTeachers();
 
     // Buscar professores por especialidade
     List<Teacher> findBySpecialtyContainingIgnoreCase(String specialty);

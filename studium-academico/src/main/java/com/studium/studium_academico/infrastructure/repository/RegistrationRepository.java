@@ -40,19 +40,21 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
     Long countByClassEntityId(UUID classId);
 
     @Query("""
-    SELECT COUNT(DISTINCT r.id)
-    FROM Registration r
-    JOIN r.classEntity ce
-    WHERE ce.teacherClasses.size = :teacherId
-""")
-    long countByTeacherId(UUID teacherId);
-
-    @Query("""
     SELECT COUNT(r)
     FROM Registration r
     WHERE r.course.id = :courseId
 """)
     long countByCourseId(UUID courseId);
+
+    @Query("""
+        SELECT COUNT(DISTINCT r.student.id)
+        FROM Registration r
+        JOIN r.classEntity ce
+        JOIN TeacherClass tc ON tc.classEntity.id = ce.id
+        WHERE tc.teacher.id = :teacherId
+    """)
+    long countByTeacherId(@Param("teacherId") UUID teacherId);
+
 
 
 }

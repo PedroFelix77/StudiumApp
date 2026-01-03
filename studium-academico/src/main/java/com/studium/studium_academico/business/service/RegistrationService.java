@@ -3,6 +3,7 @@ package com.studium.studium_academico.business.service;
 import com.studium.studium_academico.business.dto.request.RegistrationRequestDTO;
 import com.studium.studium_academico.business.dto.response.RegistrationResponseDTO;
 import com.studium.studium_academico.business.dto.response.RegistrationValidationResponseDTO;
+import com.studium.studium_academico.business.dto.response.StudentInClassResponseDTO;
 import com.studium.studium_academico.infrastructure.entity.*;
 import com.studium.studium_academico.infrastructure.repository.ClassesRepository;
 import com.studium.studium_academico.infrastructure.repository.CourseRepository;
@@ -155,6 +156,23 @@ public class RegistrationService {
 
         Registration updated = registrationRepository.save(registration);
         return registrationMapper.toResponseDTO(updated);
+    }
+
+    public List<StudentInClassResponseDTO> findStudentsByClassId(UUID classId) {
+
+        if (!classesRepository.existsById(classId)) {
+            throw new RuntimeException("Turma não encontrada");
+        }
+
+        return registrationRepository.findByClassEntityId(classId)
+                .stream()
+                .map(reg -> new StudentInClassResponseDTO(
+                        reg.getId(),
+                        reg.getStudent().getId(),
+                        reg.getStudent().getUser().getName(),
+                        reg.getRegistrationNumber()
+                ))
+                .toList();
     }
 
     @Transactional

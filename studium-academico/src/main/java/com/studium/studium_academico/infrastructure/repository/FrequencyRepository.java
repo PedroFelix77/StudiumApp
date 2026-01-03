@@ -51,4 +51,14 @@ public interface FrequencyRepository extends JpaRepository<Frequency, UUID>, Jpa
     @Query("SELECT COUNT(f) FROM Frequency f WHERE f.registration.id = :registrationId AND f.statusFrequency = :status AND f.attendanceDate BETWEEN :start AND :end")
     Long countByRegistrationAndStatusAndDateRange(UUID registrationId, StatusFrequency status, LocalDate start, LocalDate end);
 
+    @Query("""
+        SELECT COUNT(f) 
+        FROM Frequency f 
+        WHERE f.registration.student.id = :studentId 
+        AND f.status = :status
+    """)
+    long countByStudentIdAndStatus(
+            @Param("studentId") UUID studentId,
+            @Param("status") StatusFrequency status
+    );
 }

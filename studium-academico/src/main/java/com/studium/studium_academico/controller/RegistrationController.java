@@ -3,6 +3,7 @@ package com.studium.studium_academico.controller;
 import com.studium.studium_academico.business.dto.request.RegistrationRequestDTO;
 import com.studium.studium_academico.business.dto.response.RegistrationResponseDTO;
 import com.studium.studium_academico.business.dto.response.RegistrationValidationResponseDTO;
+import com.studium.studium_academico.business.dto.response.StudentInClassResponseDTO;
 import com.studium.studium_academico.business.service.RegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ public class RegistrationController {
     private RegistrationService registrationService;
 
     // CREATE
-    @PostMapping
+    @PostMapping()
     public ResponseEntity<RegistrationResponseDTO> createRegistration(@RequestBody RegistrationRequestDTO data) {
         RegistrationResponseDTO response = registrationService.createRegistration(data);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -108,5 +109,14 @@ public class RegistrationController {
     public ResponseEntity<Long> countClassRegistrations(@PathVariable UUID classId) {
         Long count = registrationService.countByClassId(classId);
         return ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/class/{classId}/students")
+    public ResponseEntity<List<StudentInClassResponseDTO>> getStudentsByClass(
+            @PathVariable UUID classId
+    ) {
+        return ResponseEntity.ok(
+                registrationService.findStudentsByClassId(classId)
+        );
     }
 }

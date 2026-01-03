@@ -13,7 +13,7 @@ export function getRolePath(role: string): string {
   const roleUpper = role.toUpperCase();
   const roleToPathMap: Record<string, string> = {
     ADMIN: "admin",
-    DIRECTOR: "diretor",
+    DIRECTOR: "director",
     TEACHER: "professor",
     STUDENT: "aluno",
   };

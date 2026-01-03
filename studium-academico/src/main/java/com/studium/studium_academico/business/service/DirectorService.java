@@ -46,6 +46,7 @@ public class DirectorService {
 
     @Transactional
     public TeacherResponseDTO createTeacher(CreateTeacherRequestDTO data) {
+        log.info("CREATE TEACHER PAYLOAD: {}", data);
         UserResponseDTO userResponseDTO = userService.createUser(
                 data.user(),
                 data.address(),
@@ -91,11 +92,8 @@ public class DirectorService {
 
         Users user = userService.findById(userResponse.id());
 
-        String registrationNumber = registrationService.generateRegistrationNumber();
-
         Student student = Student.builder()
                 .user(user)
-                .registration(registrationNumber)
                 .responsibleName(data.responsibleName())
                 .responsiblePhone(data.responsiblePhone())
                 .registrations(new ArrayList<>())

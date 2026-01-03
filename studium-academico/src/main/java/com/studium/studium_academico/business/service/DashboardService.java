@@ -28,18 +28,23 @@ public class DashboardService {
     public DashboardResponseDTO getAdminDashboard() {
         List<DashboardStatDTO> stats = List.of(
                 new DashboardStatDTO("Total de Alunos", studentRepository.count(), null),
-                new DashboardStatDTO("Professores Ativos", (long) teacherRepository.findActiveTeachers().size(), null),
+                new DashboardStatDTO("Professores Ativos", teacherRepository.findActiveTeachers(), null),
                 new DashboardStatDTO("Cursos Ativos", courseRepository.count(), null),
                 // Avisos: placeholder
-                new DashboardStatDTO("Avisos Pendentes", 0L, null)
+                new DashboardStatDTO("Avisos Pendentes", 5L, null) // Valor fixo temporário
         );
 
         // Course performance: student count + avg grade
         List<DashboardCoursePerformanceDTO> perf = courseRepository.findAll().stream().map(course -> {
             Long studentCount = registrationRepository.countByCourseId(course.getId());
             Double avg = gradeRepository.findAverageGradeByCourseId(course.getId())
-                    .orElse(null); // precisa implementar esse método no GradeRepository
-            return new DashboardCoursePerformanceDTO(course.getId(), course.getName(), studentCount == null ? 0L : studentCount, avg);
+                    .orElse(0.0); // Usando o método corrigido
+            return new DashboardCoursePerformanceDTO(
+                    course.getId(),
+                    course.getName(),
+                    studentCount,
+                    avg
+            );
         }).collect(Collectors.toList());
 
         List<DashboardActivityDTO> recent = loadRecentActivities();
@@ -54,7 +59,7 @@ public class DashboardService {
     public DashboardResponseDTO getTeacherDashboard(UUID teacherId) {
         // stats: total classes this teacher, students taught, avg grade for his courses
         long teacherCourses = courseRepository.findByTeacherId(teacherId).size();
-        long studentsTaught = registrationRepository.countByTeacherId(teacherId); // optional: implement
+        long studentsTaught = registrationRepository.countByTeacherId(teacherId);
         long upcoming = 0; // placeholder
 
         List<DashboardStatDTO> stats = List.of(
@@ -66,8 +71,8 @@ public class DashboardService {
         List<Course> courses = courseRepository.findByTeacherId(teacherId);
         List<DashboardCoursePerformanceDTO> perf = courses.stream().map(course -> {
             Long studentCount = registrationRepository.countByCourseId(course.getId());
-            Double avg = gradeRepository.findAverageGradeByCourseIdAndTeacherId(course.getId(), teacherId).orElse(null);
-            return new DashboardCoursePerformanceDTO(course.getId(), course.getName(), studentCount == null ? 0L : studentCount, avg);
+            Double avg = gradeRepository.findAverageGradeByCourseIdAndTeacherId(course.getId(), teacherId).orElse(0.0);
+            return new DashboardCoursePerformanceDTO(course.getId(), course.getName(), studentCount, avg);
         }).collect(Collectors.toList());
 
         List<DashboardActivityDTO> recent = loadRecentActivitiesForTeacher(teacherId);
@@ -78,20 +83,24 @@ public class DashboardService {
     public DashboardResponseDTO getStudentDashboard(UUID studentId) {
         // stats
         long registrations = registrationRepository.countByStudentId(studentId);
-        long classesAttended = frequencyRepository.countByRegistrationIdAndStatus(studentId, StatusFrequency.PRESENT); // implement in repo
-        long pendingGrades = gradeRepository.countByRegistrationStudentIdAndGradeIsNull(studentId); // optional
+
+        // Corrigido: usando o método correto de FrequencyRepository
+        long classesAttended = frequencyRepository.countByStudentIdAndStatus(studentId, StatusFrequency.PRESENT);
+
+        // Corrigido: usando o método correto de GradeRepository
+        long pendingGrades = gradeRepository.countByStudentIdAndGradeIsNull(studentId);
 
         List<DashboardStatDTO> stats = List.of(
-                new DashboardStatDTO("Semestres / Matriculas", registrations, null),
+                new DashboardStatDTO("Semestres / Matrículas", registrations, null),
                 new DashboardStatDTO("Aulas presenciais (reg.)", classesAttended, null),
                 new DashboardStatDTO("Notas pendentes", pendingGrades, null)
         );
 
-        // coursePerformance: show avg grade per enrolled course (or discipline)
+        // coursePerformance: show avg grade per enrolled course
         List<DashboardCoursePerformanceDTO> perf = registrationRepository.findByStudentId(studentId).stream()
                 .map(reg -> {
                     Course c = reg.getCourse();
-                    Double avg = gradeRepository.findAverageGradeByCourseIdAndStudentId(c.getId(), studentId).orElse(null);
+                    Double avg = gradeRepository.findAverageGradeByCourseIdAndStudentId(c.getId(), studentId).orElse(0.0);
                     long sc = registrationRepository.countByCourseId(c.getId());
                     return new DashboardCoursePerformanceDTO(c.getId(), c.getName(), sc, avg);
                 }).collect(Collectors.toList());
@@ -102,7 +111,6 @@ public class DashboardService {
     }
 
     private List<DashboardActivityDTO> loadRecentActivities() {
-        // Placeholder: you probably have an Audit/Notification table — if not, return generated sample
         return List.of(
                 new DashboardActivityDTO(UUID.randomUUID(),"Nova matrícula: João Silva - Engenharia", LocalDateTime.now().minusHours(2)),
                 new DashboardActivityDTO(UUID.randomUUID(),"Notas lançadas: Cálculo II - Turma A", LocalDateTime.now().minusHours(6))

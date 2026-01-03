@@ -8,11 +8,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/classes")
+@RequestMapping("api/classes")
 public class ClassesController {
 
     private final ClassesService service;
@@ -35,6 +36,11 @@ public class ClassesController {
     @PutMapping("/{id}")
     public ClassResponseDTO update(@PathVariable UUID id, @RequestBody ClassRequestDTO dto) {
         return service.update(id, dto);
+    }
+
+    @GetMapping("/course/{courseId}")
+    public List<ClassResponseDTO> findByCourse(@PathVariable UUID courseId) {
+        return service.findByCourseId(courseId);
     }
 
     @DeleteMapping("/{id}")

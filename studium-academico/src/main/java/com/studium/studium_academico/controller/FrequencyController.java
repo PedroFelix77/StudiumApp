@@ -22,7 +22,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/frequencies")
+@RequestMapping("/api/frequencies")
 @RequiredArgsConstructor
 public class FrequencyController {
 
@@ -69,7 +69,7 @@ public class FrequencyController {
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate endDate,
-            @PageableDefault(size = 20, sort = "date", direction = Sort.Direction.DESC)
+            @PageableDefault(size = 20, sort = "attendanceDate", direction = Sort.Direction.DESC)
             Pageable pageable
     ) {
         Page<FrequencyResponseDTO> result = filterService.filterGlobal(
@@ -97,7 +97,7 @@ public class FrequencyController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate endDate,
 
-            @PageableDefault(size = 50, sort = "date", direction = Sort.Direction.DESC)
+            @PageableDefault(size = 50, sort = "attendanceDate", direction = Sort.Direction.DESC)
             Pageable pageable
     ) {
         Page<FrequencyResponseDTO> result = filterService.filterForStudent(

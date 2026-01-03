@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -46,6 +47,17 @@ public class ClassesService {
         return classesRepository.findById(id)
                 .map(mapper::toResponse)
                 .orElseThrow(() -> new RuntimeException("Turma não encontrada."));
+    }
+
+    public List<ClassResponseDTO> findByCourseId(UUID courseId) {
+        if (!courseRepository.existsById(courseId)) {
+            throw new RuntimeException("Curso não encontrado");
+        }
+
+        return classesRepository.findByCourseId(courseId)
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
     }
 
     public ClassResponseDTO update(UUID id, ClassRequestDTO dto) {

@@ -8,7 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "registration")
+@Table(name = "registration",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_registration_student_class",
+                        columnNames = {"student_id", "class_id"}
+                )
+        })
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,19 +24,19 @@ public class Registration extends BaseEntity {
 
     @Column(name = "enrollment", unique = true, nullable = false)
     private String registrationNumber;
-    @Column(name = "date_Registration", nullable = false)
+    @Column(name = "date_registration", nullable = false)
     private LocalDate dateRegistration;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
-    @ManyToOne
-    @JoinColumn(name = "class_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "class_id")
     private Classes classEntity;
 
     @OneToMany(mappedBy = "registration", fetch = FetchType.LAZY)
