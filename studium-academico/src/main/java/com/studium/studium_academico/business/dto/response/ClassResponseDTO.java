@@ -6,7 +6,5 @@ public record ClassResponseDTO(
         UUID id,
         String name,
         String codeClass,
-        String academicYear,
-        UUID courseId,
-        String courseName
+        String academicYear
 ) {}

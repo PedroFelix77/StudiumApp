@@ -43,7 +43,7 @@ export const useAuthProvider = () => {
   };
 
   const login = async ({ email, password }: { email: string; password: string }) => {
-    const { data } = await api.post("/auth/login", {
+    const { data } = await api.post("/api/auth/login", {
       email,
       password,
     });

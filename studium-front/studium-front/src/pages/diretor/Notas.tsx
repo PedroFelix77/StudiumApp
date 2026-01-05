@@ -1,398 +1,320 @@
-import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { api } from "@/services/api";
-import { BookOpen, User, TrendingUp } from "lucide-react";
+"use client"
 
-interface Grade {
-  id: string;
-  studentId: string;
-  studentName: string;
-  studentRegistration?: string;
-  courseId: string;
-  courseName: string;
-  courseCode?: string;
-  examId?: string;
-  examName?: string;
-  examType?: string;
-  grade: number;
-  maxGrade?: number;
-  date: string;
-  createdAt?: string;
+import { useEffect, useState } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Search, Save } from "lucide-react"
+import { api } from "@/services/api"
+
+interface Course {
+  id: string
+  name: string
 }
 
-interface CourseGrades {
-  courseId: string;
-  courseName: string;
-  courseCode?: string;
-  grades: Grade[];
-  average?: number;
+interface Class {
+  id: string
+  name: string
 }
 
-interface StudentGrades {
-  studentId: string;
-  studentName: string;
-  studentRegistration?: string;
-  courses: CourseGrades[];
-  overallAverage?: number;
+interface StudentRow {
+  registrationId: string
+  studentName: string
+  enrollment: string
+  p1?: number
+  p2?: number
+  final?: number
+  media: number
 }
 
-export default function DiretorNotas() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCourse, setSelectedCourse] = useState<string>("");
-  const [selectedStudent, setSelectedStudent] = useState<string>("");
-  const [viewMode, setViewMode] = useState<"byCourse" | "byStudent">("byCourse");
-  const [grades, setGrades] = useState<Grade[]>([]);
-  const [courses, setCourses] = useState<{ id: string; name: string; code?: string }[]>([]);
-  const [students, setStudents] = useState<{ id: string; name: string; registration?: string }[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [pageNumber, setPageNumber] = useState(0);
-  const [total, setTotal] = useState(0);
+export default function NotasDiretorPage() {
+  const [courses, setCourses] = useState<Course[]>([])
+  const [classes, setClasses] = useState<Class[]>([])
+  const [rows, setRows] = useState<StudentRow[]>([])
+  const [search, setSearch] = useState("")
+
+  const [selectedCourse, setSelectedCourse] = useState("")
+  const [selectedClass, setSelectedClass] = useState("")
 
   useEffect(() => {
-    fetchCourses();
-    fetchStudents();
-  }, []);
+    loadCourses()
+  }, [])
 
   useEffect(() => {
-    fetchGrades();
-  }, [searchTerm, selectedCourse, selectedStudent, pageNumber]);
+    if (selectedCourse) {
+      loadClasses()
+      setSelectedClass("")
+      setRows([])
+    }
+  }, [selectedCourse])
 
-  async function fetchCourses() {
+  useEffect(() => {
+    if (selectedClass) {
+      loadStudentsAndGrades()
+    }
+  }, [selectedClass])
+
+  async function loadCourses() {
+    const res = await api.get("/api/courses", { params: { page: 0, size: 100 } })
+    setCourses(res.data.content || [])
+  }
+
+  async function loadClasses() {
     try {
-      const res = await api.get("/courses", { params: { page: 0, size: 100 } });
-      setCourses(res.data.content || []);
+      const res = await api.get(`/api/classes/course/${selectedCourse}`)
+      const classesData = res.data.content || res.data || []
+      setClasses(Array.isArray(classesData) ? classesData : [])
+      console.log("Turmas carregadas:", classesData)
     } catch (err) {
-      console.error("Erro ao carregar cursos", err);
+      console.error("Erro ao carregar turmas:", err)
+      setClasses([])
     }
   }
 
-  async function fetchStudents() {
+  async function loadStudentsAndGrades() {
     try {
-      const res = await api.get("/students", { params: { page: 0, size: 100 } });
-      setStudents(res.data.content || []);
+      // 1️⃣ Alunos da turma
+      const studentsRes = await api.get(
+        `/api/registrations/class/${selectedClass}/students`
+      )
+
+      // A resposta pode vir como array direto ou dentro de data
+      const students = Array.isArray(studentsRes.data)
+        ? studentsRes.data
+        : (studentsRes.data?.content || studentsRes.data || [])
+
+      console.log("Alunos carregados:", students)
+
+      // 2️⃣ Notas da turma - buscar notas do curso e filtrar por classId no frontend
+      // Primeiro precisamos do courseId da turma, então vamos buscar todas as notas do curso
+      const gradesRes = await api.get("/api/grades/filter/course", {
+        params: {
+          courseId: selectedCourse,
+          page: 0,
+          size: 200
+        }
+      })
+
+      const allGrades = gradesRes.data.content || []
+      // Filtrar notas apenas da turma selecionada
+      const grades = allGrades.filter((g: any) => g.classId === selectedClass)
+      console.log("Notas carregadas:", grades)
+
+      const grouped: Record<string, StudentRow> = {}
+
+      students.forEach((s: any) => {
+        grouped[s.registrationId] = {
+          registrationId: s.registrationId,
+          studentName: s.studentName,
+          enrollment: s.registrationNumber || s.enrollment,
+          media: 0
+        }
+      })
+
+      grades.forEach((g: any) => {
+        const row = grouped[g.registrationId]
+        if (!row) return
+
+        if (g.typeGrade === "PROVA1" || g.type === "PROVA1") row.p1 = g.grade || g.value
+        if (g.typeGrade === "PROVA2" || g.type === "PROVA2") row.p2 = g.grade || g.value
+        if (g.typeGrade === "FINAL" || g.type === "FINAL") row.final = g.grade || g.value
+      })
+
+      const parsed = Object.values(grouped).map((r) => {
+        const p1 = r.p1 ?? 0
+        const p2 = r.p2 ?? 0
+        return {
+          ...r,
+          media: Number(((p1 + p2) / 2).toFixed(1))
+        }
+      })
+
+      console.log("Rows processados:", parsed)
+      setRows(parsed)
     } catch (err) {
-      console.error("Erro ao carregar alunos", err);
+      console.error("Erro ao carregar alunos e notas:", err)
+      setRows([])
     }
   }
 
-  async function fetchGrades() {
-    setLoading(true);
-    try {
-      const params: any = {
-        q: searchTerm,
-        page: pageNumber,
-        size: 20,
-      };
-      if (selectedCourse) params.courseId = selectedCourse;
-      if (selectedStudent) params.studentId = selectedStudent;
+  const updateValue = (
+    id: string,
+    field: "p1" | "p2" | "final",
+    value: string
+  ) => {
+    const num = Number(value)
+    if (num < 0 || num > 10) return
 
-      const res = await api.get("/grades", { params });
-      setGrades(res.data.content || []);
-      setTotal(res.data.totalElements || 0);
-    } catch (err) {
-      console.error("Erro ao carregar notas", err);
-    } finally {
-      setLoading(false);
-    }
+    setRows((prev) =>
+      prev.map((r) =>
+        r.registrationId === id
+          ? {
+            ...r,
+            [field]: num,
+            media: Number((((r.p1 ?? 0) + (r.p2 ?? 0)) / 2).toFixed(1))
+          }
+          : r
+      )
+    )
   }
 
-  // Agrupar notas por curso
-  const gradesByCourse = grades.reduce((acc, grade) => {
-    if (!acc[grade.courseId]) {
-      acc[grade.courseId] = {
-        courseId: grade.courseId,
-        courseName: grade.courseName,
-        courseCode: grade.courseCode,
-        grades: [],
-      };
-    }
-    acc[grade.courseId].grades.push(grade);
-    return acc;
-  }, {} as Record<string, CourseGrades>);
-
-  // Calcular médias por curso
-  Object.values(gradesByCourse).forEach((course) => {
-    if (course.grades.length > 0) {
-      const sum = course.grades.reduce((acc, g) => acc + g.grade, 0);
-      course.average = sum / course.grades.length;
-    }
-  });
-
-  // Agrupar notas por aluno
-  const gradesByStudent = grades.reduce((acc, grade) => {
-    if (!acc[grade.studentId]) {
-      acc[grade.studentId] = {
-        studentId: grade.studentId,
-        studentName: grade.studentName,
-        studentRegistration: grade.studentRegistration,
-        courses: [],
-      };
-    }
-
-    let courseGroup = acc[grade.studentId].courses.find(c => c.courseId === grade.courseId);
-    if (!courseGroup) {
-      courseGroup = {
-        courseId: grade.courseId,
-        courseName: grade.courseName,
-        courseCode: grade.courseCode,
-        grades: [],
-      };
-      acc[grade.studentId].courses.push(courseGroup);
-    }
-    courseGroup.grades.push(grade);
-    return acc;
-  }, {} as Record<string, StudentGrades>);
-
-  // Calcular médias por aluno e curso
-  Object.values(gradesByStudent).forEach((student) => {
-    let totalSum = 0;
-    let totalCount = 0;
-
-    student.courses.forEach((course) => {
-      if (course.grades.length > 0) {
-        const sum = course.grades.reduce((acc, g) => acc + g.grade, 0);
-        course.average = sum / course.grades.length;
-        totalSum += course.average;
-        totalCount++;
+  const saveGrades = async () => {
+    for (const r of rows) {
+      if (r.p1 !== undefined) {
+        await api.post("/api/grades", {
+          registrationId: r.registrationId,
+          typeGrade: "PROVA1",
+          grade: r.p1
+        })
       }
-    });
 
-    if (totalCount > 0) {
-      student.overallAverage = totalSum / totalCount;
+      if (r.p2 !== undefined) {
+        await api.post("/api/grades", {
+          registrationId: r.registrationId,
+          typeGrade: "PROVA2",
+          grade: r.p2
+        })
+      }
+
+      if (r.media < 7 && r.final !== undefined) {
+        await api.post("/api/grades", {
+          registrationId: r.registrationId,
+          typeGrade: "FINAL",
+          grade: r.final
+        })
+      }
     }
-  });
 
-  const getGradeColor = (grade: number) => {
-    if (grade >= 7) return "text-green-600";
-    if (grade >= 5) return "text-yellow-600";
-    return "text-red-600";
-  };
+    loadStudentsAndGrades()
+  }
+
+  const filtered = rows.filter(
+    (r) =>
+      r.studentName.toLowerCase().includes(search.toLowerCase()) ||
+      r.enrollment.includes(search)
+  )
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold">Gestão de Notas</h1>
-        <p className="text-muted-foreground">Visualize e gerencie notas dos alunos por curso ou por aluno</p>
-      </div>
+    <Card>
+      <CardHeader className="flex justify-between items-center">
+        <CardTitle>Notas por Turma</CardTitle>
+        <Button onClick={saveGrades} className="gap-2">
+          <Save size={18} /> Salvar
+        </Button>
+      </CardHeader>
 
-      {/* Filtros */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Filtros</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
+      <CardContent>
+        {/* Curso */}
+        <label className="text-sm font-medium">Curso</label>
+        <select
+          className="w-full h-9 border rounded-md mb-4"
+          value={selectedCourse}
+          onChange={(e) => setSelectedCourse(e.target.value)}
+        >
+          <option value="">Selecione o curso</option>
+          {courses.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+
+        {/* Turma */}
+        {classes.length > 0 && (
+          <>
+            <label className="text-sm font-medium">Turma</label>
+            <select
+              className="w-full h-9 border rounded-md mb-4"
+              value={selectedClass}
+              onChange={(e) => setSelectedClass(e.target.value)}
+            >
+              <option value="">Selecione a turma</option>
+              {classes.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
+
+        {/* Busca */}
+        {rows.length > 0 && (
+          <>
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
               <Input
-                placeholder="Buscar por aluno, curso ou avaliação..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar aluno..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10"
               />
             </div>
-            <div>
-              <select
-                className="w-full h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-                value={selectedCourse}
-                onChange={(e) => setSelectedCourse(e.target.value)}
-              >
-                <option value="">Todos os cursos</option>
-                {courses.map((course) => (
-                  <option key={course.id} value={course.id}>
-                    {course.code ? `${course.code} - ` : ""}{course.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <select
-                className="w-full h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-                value={selectedStudent}
-                onChange={(e) => setSelectedStudent(e.target.value)}
-              >
-                <option value="">Todos os alunos</option>
-                {students.map((student) => (
-                  <option key={student.id} value={student.id}>
-                    {student.registration ? `${student.registration} - ` : ""}{student.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant={viewMode === "byCourse" ? "default" : "outline"}
-                onClick={() => setViewMode("byCourse")}
-                className="flex-1"
-              >
-                <BookOpen size={16} className="mr-2" />
-                Por Curso
-              </Button>
-              <Button
-                variant={viewMode === "byStudent" ? "default" : "outline"}
-                onClick={() => setViewMode("byStudent")}
-                className="flex-1"
-              >
-                <User size={16} className="mr-2" />
-                Por Aluno
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
-      {loading && <div className="text-center py-8">Carregando...</div>}
-
-      {!loading && viewMode === "byCourse" && (
-        <div className="space-y-4">
-          {Object.values(gradesByCourse).map((course) => (
-            <Card key={course.courseId}>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <BookOpen size={20} />
-                      {course.courseCode && <span className="text-muted-foreground">{course.courseCode} - </span>}
-                      {course.courseName}
-                    </CardTitle>
-                    {course.average !== undefined && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Média do curso: <span className={`font-semibold ${getGradeColor(course.average)}`}>{course.average.toFixed(2)}</span>
-                      </p>
-                    )}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {course.grades.length} {course.grades.length === 1 ? "nota" : "notas"}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="text-sm text-muted-foreground border-b">
-                      <th className="p-2">Aluno</th>
-                      <th className="p-2">Matrícula</th>
-                      <th className="p-2">Avaliação</th>
-                      <th className="p-2">Tipo</th>
-                      <th className="p-2">Nota</th>
-                      <th className="p-2">Data</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {course.grades.map((grade) => (
-                      <tr key={grade.id} className="border-b">
-                        <td className="p-2">{grade.studentName}</td>
-                        <td className="p-2 text-muted-foreground">{grade.studentRegistration ?? "-"}</td>
-                        <td className="p-2">{grade.examName ?? "-"}</td>
-                        <td className="p-2 text-muted-foreground text-sm">{grade.examType ?? "-"}</td>
-                        <td className="p-2">
-                          <span className={`font-semibold ${getGradeColor(grade.grade)}`}>
-                            {grade.grade.toFixed(1)}
-                            {grade.maxGrade && ` / ${grade.maxGrade}`}
-                          </span>
-                        </td>
-                        <td className="p-2 text-muted-foreground text-sm">
-                          {new Date(grade.date).toLocaleDateString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </CardContent>
-            </Card>
-          ))}
-          {Object.keys(gradesByCourse).length === 0 && (
-            <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                Nenhuma nota encontrada
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
-
-      {!loading && viewMode === "byStudent" && (
-        <div className="space-y-4">
-          {Object.values(gradesByStudent).map((student) => (
-            <Card key={student.studentId}>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <User size={20} />
-                      {student.studentName}
-                      {student.studentRegistration && (
-                        <span className="text-muted-foreground font-normal">({student.studentRegistration})</span>
+            {/* Tabela */}
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b">
+                  <th>Aluno</th>
+                  <th>Matrícula</th>
+                  <th>P1</th>
+                  <th>P2</th>
+                  <th>Média</th>
+                  <th>Final</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((r) => (
+                  <tr key={r.registrationId} className="border-b">
+                    <td>{r.studentName}</td>
+                    <td>{r.enrollment}</td>
+                    <td>
+                      <Input
+                        type="number"
+                        value={r.p1 ?? ""}
+                        onChange={(e) =>
+                          updateValue(r.registrationId, "p1", e.target.value)
+                        }
+                        className="w-16 text-center"
+                      />
+                    </td>
+                    <td>
+                      <Input
+                        type="number"
+                        value={r.p2 ?? ""}
+                        onChange={(e) =>
+                          updateValue(r.registrationId, "p2", e.target.value)
+                        }
+                        className="w-16 text-center"
+                      />
+                    </td>
+                    <td
+                      className={`font-semibold ${r.media >= 7 ? "text-green-600" : "text-red-600"
+                        }`}
+                    >
+                      {r.media}
+                    </td>
+                    <td>
+                      {r.media < 7 ? (
+                        <Input
+                          type="number"
+                          value={r.final ?? ""}
+                          onChange={(e) =>
+                            updateValue(r.registrationId, "final", e.target.value)
+                          }
+                          className="w-16 text-center"
+                        />
+                      ) : (
+                        "—"
                       )}
-                    </CardTitle>
-                    {student.overallAverage !== undefined && (
-                      <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
-                        <TrendingUp size={16} />
-                        Média geral: <span className={`font-semibold ${getGradeColor(student.overallAverage)}`}>{student.overallAverage.toFixed(2)}</span>
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {student.courses.map((course) => (
-                    <div key={course.courseId} className="border rounded-lg p-4">
-                      <div className="flex justify-between items-center mb-3">
-                        <h4 className="font-semibold">
-                          {course.courseCode && <span className="text-muted-foreground">{course.courseCode} - </span>}
-                          {course.courseName}
-                        </h4>
-                        {course.average !== undefined && (
-                          <span className={`font-semibold ${getGradeColor(course.average)}`}>
-                            Média: {course.average.toFixed(2)}
-                          </span>
-                        )}
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        {course.grades.map((grade) => (
-                          <div key={grade.id} className="border rounded p-2">
-                            <div className="text-xs text-muted-foreground">{grade.examName ?? "Avaliação"}</div>
-                            <div className={`font-semibold ${getGradeColor(grade.grade)}`}>
-                              {grade.grade.toFixed(1)}
-                              {grade.maxGrade && ` / ${grade.maxGrade}`}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {new Date(grade.date).toLocaleDateString()}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-          {Object.keys(gradesByStudent).length === 0 && (
-            <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                Nenhuma nota encontrada
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
-
-      {/* Paginação */}
-      {total > 0 && (
-        <div className="flex justify-between items-center">
-          <div className="text-sm text-muted-foreground">{total} resultados encontrados</div>
-          <div className="space-x-2">
-            <Button onClick={() => setPageNumber(Math.max(0, pageNumber - 1))} disabled={pageNumber === 0}>
-              Anterior
-            </Button>
-            <Button onClick={() => setPageNumber(pageNumber + 1)} disabled={grades.length < 20}>
-              Próxima
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  )
 }

@@ -2,6 +2,8 @@ package com.studium.studium_academico.infrastructure.repository;
 
 import com.studium.studium_academico.infrastructure.entity.Grade;
 import com.studium.studium_academico.infrastructure.entity.TypeGrade;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -66,6 +68,23 @@ public interface GradeRepository extends JpaRepository<Grade, UUID>, JpaSpecific
     @Query("SELECT g FROM Grade g WHERE g.registration.registrationNumber = :registrationNumber")
     List<Grade> findByRegistrationNumber(@Param("registrationNumber") String registrationNumber);
 
+    @Query("SELECT g FROM Grade g WHERE g.registration.id = :registrationId AND g.discipline.id = :disciplineId")
+    List<Grade> findByRegistrationIdAndDisciplineId(
+            @Param("registrationId") UUID registrationId,
+            @Param("disciplineId") UUID disciplineId
+    );
 
+    @Query("""
+    SELECT g
+    FROM Grade g
+    JOIN g.registration r
+    JOIN r.classEntity c
+    JOIN c.teacherClasses tc
+    WHERE tc.teacher.id = :teacherId
+""")
+    Page<Grade> findGradesByTeacher(
+            @Param("teacherId") UUID teacherId,
+            Pageable pageable
+    );
 
 }

@@ -15,7 +15,7 @@ export default function AdminTeachersPage() {
   async function handleDelete(id: string) {
     if (!confirm("Deseja desativar este professor?")) return;
     try {
-      await api.delete(`/teachers/${id}`);
+      await api.delete(`/api/teachers/${id}`);
       window.location.reload();
     } catch (err) {
       console.error(err);

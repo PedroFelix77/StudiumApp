@@ -9,8 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -49,4 +51,13 @@ public class CourseController {
         courseService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/teacher/{teacherId}")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<List<CourseResponseDTO>> getByTeacher(
+            @PathVariable UUID teacherId
+    ) {
+        return ResponseEntity.ok(courseService.findByTeacher(teacherId));
+    }
+
 }

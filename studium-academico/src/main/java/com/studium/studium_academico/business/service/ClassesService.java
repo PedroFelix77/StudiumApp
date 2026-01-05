@@ -4,9 +4,11 @@ import com.studium.studium_academico.business.dto.request.ClassRequestDTO;
 import com.studium.studium_academico.business.dto.response.ClassResponseDTO;
 import com.studium.studium_academico.infrastructure.entity.Classes;
 import com.studium.studium_academico.infrastructure.entity.Course;
+import com.studium.studium_academico.infrastructure.exceptions.ResourceNotFoundException;
 import com.studium.studium_academico.infrastructure.mapper.ClassesMapper;
 import com.studium.studium_academico.infrastructure.repository.ClassesRepository;
 import com.studium.studium_academico.infrastructure.repository.CourseRepository;
+import com.studium.studium_academico.infrastructure.repository.TeacherRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,7 @@ public class ClassesService {
     private final ClassesRepository classesRepository;
     private final CourseRepository courseRepository;
     private final ClassesMapper mapper;
+    private final TeacherRepository teacherRepository;
 
     public ClassResponseDTO create(ClassRequestDTO dto) {
 
@@ -81,5 +84,22 @@ public class ClassesService {
             throw new RuntimeException("Turma não encontrada.");
         }
         classesRepository.deleteById(id);
+    }
+
+    public List<Classes> findClassesByTeacherAndCourse(
+            UUID teacherId,
+            UUID courseId
+    ) {
+        // valida professor
+        teacherRepository.findById(teacherId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Professor não encontrado"));
+
+        // valida curso
+        courseRepository.findById(courseId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Curso não encontrado"));
+
+        return classesRepository.findByTeacherAndCourse(teacherId, courseId);
     }
 }

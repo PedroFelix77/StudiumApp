@@ -13,7 +13,7 @@ export default function AdminStudentsPage() {
   async function handleDelete(id: string) {
     if (!confirm("Deseja desativar este aluno?")) return;
     try {
-      await api.delete(`/students/${id}`);
+      await api.delete(`/api/students/${id}`);
       // refetch: simple approach - reload page or trigger a refetch hook you add
       window.location.reload();
     } catch (err) {

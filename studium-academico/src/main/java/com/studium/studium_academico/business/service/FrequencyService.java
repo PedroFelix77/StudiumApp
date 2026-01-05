@@ -47,19 +47,15 @@ public class FrequencyService {
         Classroom classroom = classroomRepository.findById(dto.classroomId())
                 .orElseThrow(() -> new ResourceNotFoundException("Aula não encontrada: " + dto.classroomId()));
 
-        Teacher teacher = teacherRepository.findById(dto.registeredByTeacherId())
-                .orElseThrow(() -> new ResourceNotFoundException("Professor não encontrado: " + dto.registeredByTeacherId()));
 
         validateDateNotFuture(dto.attendanceDate());
         validateSameClass(registration, classroom);
         validateDisciplineBelongsToCourse(classroom.getDiscipline(), registration.getCourse());
         validateDuplicateFrequency(registration, classroom, dto.attendanceDate());
-        validateTeacherAuthorization(teacher, classroom);
 
         Frequency frequency = frequencyMapper.toEntity(dto);
         frequency.setRegistration(registration);
         frequency.setClassroom(classroom);
-        frequency.setRegisteredByTeacher(teacher);
 
         Frequency saved = frequencyRepository.save(frequency);
         return frequencyMapper.toResponse(saved);
@@ -94,16 +90,6 @@ public class FrequencyService {
             validateDisciplineBelongsToCourse(newClassroom.getDiscipline(), frequency.getRegistration().getCourse());
 
             frequency.setClassroom(newClassroom);
-        }
-
-        // Se trocou de professor
-        if (dto.registeredByTeacherId() != null &&
-                !dto.registeredByTeacherId().equals(frequency.getRegisteredByTeacher().getId())) {
-
-            Teacher newTeacher = teacherRepository.findById(dto.registeredByTeacherId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Professor não encontrado: " + dto.registeredByTeacherId()));
-            validateTeacherAuthorization(newTeacher, frequency.getClassroom());
-            frequency.setRegisteredByTeacher(newTeacher);
         }
 
         frequencyMapper.updateEntityFromDto(dto, frequency);
@@ -179,15 +165,6 @@ public class FrequencyService {
         boolean belongs = courseRepository.existsByIdAndDisciplinesId(course.getId(), discipline.getId());
         if (!belongs) {
             throw new BusinessValidationException("Disciplina não pertence ao curso da matrícula");
-        }
-    }
-
-    private void validateTeacherAuthorization(Teacher teacher, Classroom classroom) {
-        // checa se professor leciona a disciplina da aula
-        // implementação real depende do relacionamento Teacher <-> Discipline/TeacherClass
-        // Por enquanto apenas garante que teacher != null
-        if (teacher == null) {
-            throw new BusinessValidationException("Professor inválido");
         }
     }
 

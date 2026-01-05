@@ -15,7 +15,7 @@ export default function DiretorAlunos() {
   async function handleDelete(id: string) {
     if (!confirm("Deseja desativar este aluno?")) return;
     try {
-      await api.delete(`/students/${id}`);
+      await api.delete(`/api/students/${id}`);
       window.location.reload();
     } catch (err) {
       console.error(err);

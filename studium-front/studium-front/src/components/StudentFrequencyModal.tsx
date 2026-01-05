@@ -49,7 +49,7 @@ export default function StudentFrequencyModal({
     const loadRegistrationData = async () => {
         try {
             // Primeiro, buscar dados da matrícula para obter o studentId
-            const registrationRes = await api.get(`/registrations/${registrationId}`)
+            const registrationRes = await api.get(`/api/registrations/${registrationId}`)
             const registration = registrationRes.data
             setStudentId(registration.studentId || registration.student?.id)
 
@@ -64,7 +64,7 @@ export default function StudentFrequencyModal({
     const loadFrequencies = async (sid: string) => {
         setLoading(true)
         try {
-            const res = await api.get("/frequencies/filter", {
+            const res = await api.get("/api/frequencies/filter", {
                 params: {
                     studentId: sid,
                     page: 0,

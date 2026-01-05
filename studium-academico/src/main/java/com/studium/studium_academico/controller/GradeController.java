@@ -4,21 +4,25 @@ import com.studium.studium_academico.business.dto.request.GradeRequestDTO;
 import com.studium.studium_academico.business.dto.response.GradeResponseDTO;
 import com.studium.studium_academico.business.service.GradeFilterService;
 import com.studium.studium_academico.business.service.GradeService;
+import com.studium.studium_academico.infrastructure.entity.Grade;
 import com.studium.studium_academico.infrastructure.entity.TypeGrade;
+import com.studium.studium_academico.infrastructure.mapper.GradeMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/grades")
+@RequestMapping("/api/grades")
 @RequiredArgsConstructor
 public class GradeController {
 
     private final GradeService gradeService;
     private final GradeFilterService filterService;
+    private final GradeMapper gradeMapper;
 
     @PostMapping
     public GradeResponseDTO create(@RequestBody GradeRequestDTO dto) {
@@ -80,6 +84,18 @@ public class GradeController {
     ) {
         return filterService.filterForTeacher(teacherId, disciplineId, classId, type, pageable);
     }
+
+//    @GetMapping("/filter/teacher")
+//    public ResponseEntity<Page<GradeResponseDTO>> getGradesByTeacher(
+//            @RequestParam UUID teacherId,
+//            Pageable pageable
+//    ) {
+//        Page<Grade> grades = filterService.findGradesByTeacher(teacherId, pageable);
+//
+//        return ResponseEntity.ok(
+//                grades.map(gradeMapper::toDTO)
+//        );
+//    }
 
     // DIRETOR / COORDENAÇÃO
     @GetMapping("/filter/course")

@@ -1,6 +1,7 @@
 package com.studium.studium_academico.business.service;
 
 import com.studium.studium_academico.business.dto.request.GradeRequestDTO;
+import com.studium.studium_academico.business.dto.response.AverageResult;
 import com.studium.studium_academico.business.dto.response.GradeResponseDTO;
 import com.studium.studium_academico.infrastructure.entity.*;
 import com.studium.studium_academico.infrastructure.exceptions.BusinessValidationException;
@@ -28,6 +29,8 @@ public class GradeService {
     private DisciplineRepository disciplineRepository;
     @Autowired
     private ClassesRepository classRepository;
+    @Autowired
+    private AverageCalculatorService averageCalculatorService;
 
     @Transactional
     public GradeResponseDTO createGrade(GradeRequestDTO dto) {
@@ -103,4 +106,17 @@ public class GradeService {
             throw new BusinessValidationException("Professor/Disciplina inválidos");
         }
     }
+
+    public AverageResult getStudentAverage(UUID registrationId, UUID disciplineId) {
+        // Valida se a matrícula existe
+        registrationRepository.findById(registrationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Matrícula não encontrada"));
+
+        // Valida se a disciplina existe
+        disciplineRepository.findById(disciplineId)
+                .orElseThrow(() -> new ResourceNotFoundException("Disciplina não encontrada"));
+
+        return averageCalculatorService.calculateAverage(registrationId, disciplineId);
+    }
+
 }

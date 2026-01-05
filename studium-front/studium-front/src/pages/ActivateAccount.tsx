@@ -44,7 +44,7 @@ export default function ActivateAccount() {
     setLoading(true);
 
     try {
-      await api.post("/auth/activate", {
+      await api.post("/api/auth/activate", {
         token: activationToken,
         newPassword: password,
       });
@@ -74,7 +74,7 @@ export default function ActivateAccount() {
     setError("");
 
     try {
-      await api.post("/auth/resend", { token: activationToken });
+      await api.post("/api/auth/resend", { token: activationToken });
 
       setSuccessMessage("Um novo link foi enviado! Verifique seu email.");
       setCanResend(false);

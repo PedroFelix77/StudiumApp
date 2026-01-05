@@ -20,6 +20,7 @@ public interface DisciplineRepository extends JpaRepository<Discipline, UUID> {
     // Buscar disciplinas por professor
     List<Discipline> findByTeacherId(UUID teacherId);
 
+
     // Buscar disciplinas sem professor atribuído
     List<Discipline> findByTeacherIsNull();
 

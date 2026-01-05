@@ -31,7 +31,7 @@ export default function RegistrationModal({ open, onOpenChange, courseId, onSucc
         setError("")
         try {
             // Carregar alunos usando o mesmo padrão do hook useStudents
-            const studentsRes = await api.get("/students", { params: { page: 0, size: 100 } })
+            const studentsRes = await api.get("/api/students", { params: { page: 0, size: 100 } })
 
             // Processar alunos - mesmo padrão do useStudents
             const studentsData = studentsRes.data.content || []
@@ -77,7 +77,7 @@ export default function RegistrationModal({ open, onOpenChange, courseId, onSucc
         setLoading(true)
 
         try {
-            await api.post("/registrations", {
+            await api.post("/api/registrations", {
                 studentId,
                 courseId,
                 classId

@@ -4,7 +4,15 @@ import java.util.UUID;
 
 public record TeacherClassResponseDTO(
         UUID id,
-        ClassResponseDTO classEntity,
-        String subject
-) {
-}
+        UUID teacherId,
+        String teacherName,
+        UUID classId,
+        String className,
+        UUID courseId,
+        String courseName,
+        UUID disciplineId,
+        String disciplineName,
+        Integer weeklyHours,
+        Boolean isMainTeacher
+) {}
+

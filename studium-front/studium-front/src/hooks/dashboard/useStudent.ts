@@ -23,7 +23,7 @@ export function useStudents(q = "", page = 0, size = 10) {
   async function fetch(qParam = q, p = pageNumber, s = size) {
     setLoading(true);
     try {
-      const res = await api.get("/students", { params: { q: qParam, page: p, size: s } });
+      const res = await api.get("/api/students", { params: { q: qParam, page: p, size: s } });
       setItems(res.data.content || []);
       setTotal(res.data.totalElements ?? 0);
     } catch (err) {

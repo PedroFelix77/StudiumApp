@@ -12,10 +12,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/disciplines")
+@RequestMapping("/api/disciplines")
 @RequiredArgsConstructor
 public class DisciplineController {
 
@@ -44,6 +45,16 @@ public class DisciplineController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/course/{courseId}")
+    public ResponseEntity<List<DisciplineResponseDTO>> getDisciplinesByCourse(@PathVariable UUID courseId) {
+        return ResponseEntity.ok(service.findByCourseId(courseId));
+    }
+
+    @GetMapping("/page")
+    public ResponseEntity<Page<DisciplineResponseDTO>> getAllPaginated(Pageable pageable) {
+        return ResponseEntity.ok(service.findAll(pageable));
     }
 }
 

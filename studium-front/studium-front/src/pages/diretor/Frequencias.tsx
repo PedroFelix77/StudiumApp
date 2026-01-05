@@ -78,7 +78,7 @@ export default function DiretorFrequencias() {
 
   async function loadCourses() {
     try {
-      const res = await api.get("api/courses", { params: { page: 0, size: 100 } })
+      const res = await api.get("/api/courses", { params: { page: 0, size: 100 } })
       setCourses(res.data.content || [])
     } catch (err: any) {
       console.error("Erro ao carregar cursos", err)
@@ -96,7 +96,7 @@ export default function DiretorFrequencias() {
 
   async function loadStudents() {
     try {
-      const res = await api.get("/students", { params: { page: 0, size: 100 } })
+      const res = await api.get("/api/students", { params: { page: 0, size: 100 } })
       setStudents(res.data.content || [])
     } catch (err: any) {
       console.error("Erro ao carregar alunos", err)
@@ -119,7 +119,7 @@ export default function DiretorFrequencias() {
           size: 20
         }
         // Note: studentId não está no endpoint /filter/course, mas pode ser filtrado depois
-        res = await api.get("/frequencies/filter/course", { params })
+        res = await api.get("/api/frequencies/filter/course", { params })
 
         // Se tiver studentId selecionado, filtra no frontend
         let filtered = res.data.content || []
@@ -137,7 +137,7 @@ export default function DiretorFrequencias() {
           }
           if (selectedStudent) params.studentId = selectedStudent
 
-          res = await api.get("api/frequencies/filter", { params })
+          res = await api.get("/api/frequencies/filter", { params })
           setFrequencies(res.data.content || [])
           setTotal(res.data.totalElements || 0)
         } catch (globalErr: any) {

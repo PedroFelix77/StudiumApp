@@ -11,7 +11,7 @@ export default function CourseRegistrationsPage({ courseId }: { courseId: string
     const [openModal, setOpenModal] = useState(false)
 
     const loadRegistrations = async () => {
-        const res = await api.get(`/registrations/course/${courseId}`)
+        const res = await api.get(`/api/registrations/course/${courseId}`)
         setRegistrations(res.data)
     }
 

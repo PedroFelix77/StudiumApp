@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/teachers")
+@RequestMapping("/api/teachers")
 @RequiredArgsConstructor
 public class TeacherController {
 

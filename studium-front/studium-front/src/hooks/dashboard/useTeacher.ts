@@ -23,7 +23,7 @@ export function useTeachers(q = "", page = 0, size = 10) {
   async function fetch(qParam = q, p = pageNumber, s = size) {
     setLoading(true);
     try {
-      const res = await api.get("/teachers", { params: { q: qParam, page: p, size: s } });
+      const res = await api.get("/api/teachers", { params: { q: qParam, page: p, size: s } });
       const teachers = res.data.content || [];
       // Mapear dados aninhados para estrutura plana
       const mappedItems: TeacherItem[] = teachers.map((teacher: any) => ({

@@ -8,7 +8,7 @@ export interface StudentInClass {
   
   export const registrationService = {
     getStudentsByClass: async (classId: string): Promise<StudentInClass[]> => {
-      const res = await api.get(`/registrations/class/${classId}/students`)
+      const res = await api.get(`/api/registrations/class/${classId}/students`)
       return res.data
     }
   }

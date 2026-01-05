@@ -41,5 +41,13 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
 """)
     List<Course> findByTeacherId(UUID teacherId);
 
+    @Query("""
+    select distinct c.course
+    from TeacherClass tc
+    join tc.classEntity c
+    where tc.teacher.id = :teacherId
+""")
+    List<Course> findCoursesByTeacher(UUID teacherId);
+
 }
 

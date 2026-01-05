@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -73,5 +74,32 @@ public class DisciplineService {
 
     public void delete(UUID id) {
         disciplineRepository.deleteById(id);
+    }
+
+    public List<DisciplineResponseDTO> findByCourseId(UUID courseId) {
+        List<Discipline> disciplines = disciplineRepository.findByCourseId(courseId);
+        return disciplines
+                .stream()
+                .map(mapper::toDto)
+                .toList();
+    }
+
+    public List<DisciplineResponseDTO> findAll() {
+        List<Discipline> disciplines = disciplineRepository.findAll();
+        return disciplines.stream()
+                .map(mapper::toDto)
+                .toList();
+    }
+
+    public Page<DisciplineResponseDTO> findAll(Pageable pageable) {
+        return disciplineRepository.findAll(pageable)
+                .map(mapper::toDto);
+    }
+
+    public List<DisciplineResponseDTO> findByTeacherId(UUID teacherId) {
+        List<Discipline> disciplines = disciplineRepository.findByTeacherId(teacherId);
+        return disciplines.stream()
+                .map(mapper::toDto)
+                .toList();
     }
 }

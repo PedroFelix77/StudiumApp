@@ -8,9 +8,7 @@ import java.util.UUID;
 public record FrequencyRequestDTO (
         UUID registrationId,
         UUID classroomId,
-        UUID registeredByTeacherId,
         LocalDate attendanceDate,
         StatusFrequency statusFrequency,
         String justification
-) {
-}
+) {}

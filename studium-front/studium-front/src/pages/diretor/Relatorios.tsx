@@ -10,7 +10,7 @@ export default function DiretorRelatorios() {
   async function generateReport(type: string) {
     setLoading(type);
     try {
-      const res = await api.get(`/reports/${type}`, { responseType: "blob" });
+      const res = await api.get(`/api/reports/${type}`, { responseType: "blob" });
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement("a");
       link.href = url;

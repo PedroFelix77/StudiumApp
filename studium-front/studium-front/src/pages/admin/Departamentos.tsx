@@ -42,7 +42,7 @@ export default function DepartamentoAdmin() {
   async function handleDelete(id: string) {
     if (!confirm("Deseja desativar este departamento?")) return;
     try {
-      await api.delete(`/departments/${id}`);
+      await api.delete(`/api/departments/${id}`);
       fetchDepartments();
     } catch (err) {
       console.error(err);

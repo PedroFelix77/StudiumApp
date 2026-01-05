@@ -96,4 +96,9 @@ public class GradeFilterService {
 
         return gradeRepository.findAll(spec, pageable).map(mapper::toDTO);
     }
+
+    public Page<Grade> findGradesByTeacher(UUID teacherId, Pageable pageable) {
+        return gradeRepository.findGradesByTeacher(teacherId, pageable);
+    }
+
 }

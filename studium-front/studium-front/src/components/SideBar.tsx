@@ -13,8 +13,8 @@ export function Sidebar() {
   const MENU: Record<string, Array<{ label: string; path: string }>> = {
     ADMIN: [
       { label: "Dashboard", path: "/admin/dashboard" },
-      { label: "Alunos", path: "/admin/alunos" },
       { label: "Professores", path: "/admin/professores" },
+      { label: "Alunos", path: "/admin/alunos" },
       { label: "Cursos", path: "/admin/cursos" },
       { label: "Departamentos", path: "/admin/departamentos" },
       { label: "Notas", path: "/admin/notas" },

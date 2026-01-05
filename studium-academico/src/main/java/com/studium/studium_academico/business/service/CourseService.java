@@ -11,12 +11,14 @@ import com.studium.studium_academico.infrastructure.mapper.CourseMapper;
 import com.studium.studium_academico.infrastructure.repository.CourseRepository;
 import com.studium.studium_academico.infrastructure.repository.DepartmentRepository;
 import com.studium.studium_academico.infrastructure.repository.InstitutionRepository;
+import com.studium.studium_academico.infrastructure.repository.TeacherClassRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -27,6 +29,7 @@ public class CourseService {
     private final DepartmentRepository departmentRepository;
     private final InstitutionRepository institutionRepository;
     private final CourseMapper courseMapper;
+    private final TeacherClassRepository teacherClassRepository;
 
     @Transactional
     public CourseResponseDTO createCourse(CourseRequestDTO data) {
@@ -104,5 +107,12 @@ public class CourseService {
         Course c = courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Curso não encontrado"));
         courseRepository.delete(c);
+    }
+
+    public List<CourseResponseDTO> findByTeacher(UUID teacherId) {
+        return teacherClassRepository.findCoursesByTeacher(teacherId)
+                .stream()
+                .map(courseMapper::toDto)
+                .toList();
     }
 }
