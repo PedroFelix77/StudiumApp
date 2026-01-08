@@ -1,5 +1,6 @@
 package com.studium.studium_academico.business.service;
 
+import com.studium.studium_academico.business.dto.request.FrequencyByRegistrationRequestDTO;
 import com.studium.studium_academico.business.dto.request.FrequencyRequestDTO;
 import com.studium.studium_academico.business.dto.response.FrequencyResponseDTO;
 import com.studium.studium_academico.infrastructure.entity.*;
@@ -38,14 +39,25 @@ public class FrequencyService {
 
     @Transactional
     public FrequencyResponseDTO createFrequency(FrequencyRequestDTO dto) {
-        log.info("createFrequency - registration={}, classroom={}, date={}",
-                dto.registrationId(), dto.classroomId(), dto.attendanceDate());
+        if (dto.registrationId() == null) {
+            throw new BusinessValidationException("registrationId é obrigatório");
+        }
+
+        if (dto.classroomId() == null) {
+            throw new BusinessValidationException("classroomId é obrigatório");
+        }
+
+        if (dto.attendanceDate() == null) {
+            throw new BusinessValidationException("attendanceDate é obrigatória");
+        }
 
         Registration registration = registrationRepository.findById(dto.registrationId())
-                .orElseThrow(() -> new ResourceNotFoundException("Matrícula não encontrada: " + dto.registrationId()));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Matrícula não encontrada: " + dto.registrationId()));
 
         Classroom classroom = classroomRepository.findById(dto.classroomId())
-                .orElseThrow(() -> new ResourceNotFoundException("Aula não encontrada: " + dto.classroomId()));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Aula não encontrada: " + dto.classroomId()));
 
 
         validateDateNotFuture(dto.attendanceDate());
@@ -60,6 +72,55 @@ public class FrequencyService {
         Frequency saved = frequencyRepository.save(frequency);
         return frequencyMapper.toResponse(saved);
     }
+    @Transactional
+    public FrequencyResponseDTO createFrequencyByRegistration(
+            FrequencyByRegistrationRequestDTO dto
+    ) {
+        if (dto.registrationId() == null) {
+            throw new BusinessValidationException("registrationId é obrigatório");
+        }
+
+        if (dto.disciplineId() == null) {
+            throw new BusinessValidationException("disciplineId é obrigatória");
+        }
+
+        if (dto.attendanceDate() == null) {
+            throw new BusinessValidationException("attendanceDate é obrigatória");
+        }
+
+        Registration registration = registrationRepository.findById(dto.registrationId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Matrícula não encontrada: " + dto.registrationId())
+                );
+
+        // 🔑 Aula SEMESTRAL (turma + disciplina)
+        Classroom classroom = classroomRepository
+                .findByClassEntityIdAndDisciplineId(
+                        registration.getClassEntity().getId(),
+                        dto.disciplineId()
+                )
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Disciplina não vinculada à turma da matrícula"
+                        )
+                );
+
+        validateDateNotFuture(dto.attendanceDate());
+        validateSameClass(registration, classroom);
+        validateDisciplineBelongsToCourse(classroom.getDiscipline(), registration.getCourse());
+        validateDuplicateFrequency(registration, classroom, dto.attendanceDate());
+
+        Frequency frequency = new Frequency();
+        frequency.setRegistration(registration);
+        frequency.setClassroom(classroom);
+        frequency.setAttendanceDate(dto.attendanceDate());
+        frequency.setStatusFrequency(dto.statusFrequency());
+        frequency.setJustification(dto.justification());
+
+        Frequency saved = frequencyRepository.save(frequency);
+        return frequencyMapper.toResponse(saved);
+    }
+
 
     @Transactional
     public FrequencyResponseDTO updateFrequency(UUID id, FrequencyRequestDTO dto) {

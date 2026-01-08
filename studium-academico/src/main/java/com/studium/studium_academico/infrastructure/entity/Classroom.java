@@ -18,9 +18,10 @@ public class Classroom extends BaseEntity {
     private String code;
     private String name;
     @Column(nullable = false)
-    private LocalDate date;
-    @Column(nullable = false)
-    private String content; //conteudo
+    private Integer weeklyWorkLoad;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "teacher_id", nullable = false)
+    private Teacher teacher;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "class_id")
@@ -29,7 +30,7 @@ public class Classroom extends BaseEntity {
     @OneToMany(mappedBy = "classroom", fetch = FetchType.LAZY)
     private List<Frequency> frequencies = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "discipline_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "discipline_id",  nullable = false)
     private Discipline discipline;
 }

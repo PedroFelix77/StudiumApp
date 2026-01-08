@@ -45,13 +45,13 @@ public class SecurityConfig {
 
                         // DEPARTMENTS
                         .requestMatchers(HttpMethod.GET, "/api/departments/**")
-                        .hasAnyRole("DIRECTOR", "TEACHER")
+                        .hasAnyRole("DIRECTOR", "TEACHER", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/departments/**")
-                        .hasRole("DIRECTOR")
+                        .hasAnyRole("DIRECTOR", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/departments/**")
-                        .hasRole("DIRECTOR")
+                        .hasAnyRole("DIRECTOR", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/departments/**")
-                        .hasRole("DIRECTOR")
+                        .hasAnyRole("DIRECTOR")
 
                         // CLASSES
                         .requestMatchers("/api/classes/**")
@@ -73,21 +73,29 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/courses/**")
                         .hasAnyRole("DIRECTOR", "ADMIN")
 
+                        //teachers
+                        .requestMatchers(HttpMethod.GET, "/api/teachers/course/**")
+                        .hasAnyRole("DIRECTOR", "ADMIN")
                         // GRADES
                         .requestMatchers(HttpMethod.GET, "/api/grades/**")
                         .hasAnyRole("STUDENT", "TEACHER", "DIRECTOR", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/grades/**")
-                        .hasRole("TEACHER")
+                        .hasAnyRole("TEACHER", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/grades/**")
-                        .hasRole("TEACHER")
+                        .hasAnyRole("TEACHER", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/grades/**")
                         .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/grades/filter/teacher")
                         .hasAnyRole("DIRECTOR", "TEACHER")
 
                         // FREQUENCIES
-                        .requestMatchers("/api/frequencies/**")
-                        .hasAnyRole("STUDENT", "TEACHER", "DIRECTOR", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/frequencies").hasAnyRole("TEACHER", "DIRECTOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/frequencies/**").hasAnyRole("TEACHER", "DIRECTOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/frequencies/**").hasRole("DIRECTOR")
+                        .requestMatchers(HttpMethod.POST, "/api/frequencies/by-registration")
+                        .hasAnyRole("TEACHER", "DIRECTOR")
+
+                        .requestMatchers(HttpMethod.GET, "/api/frequencies/filter/**").authenticated()
 
                         // AVERAGES / TRANSCRIPTS
                         .requestMatchers("/api/averages/**")
@@ -132,6 +140,9 @@ public class SecurityConfig {
                         .hasAnyRole("DIRECTOR", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/disciplines/**")
                         .hasAnyRole("DIRECTOR", "ADMIN")
+
+                        .requestMatchers("/api/classrooms/**")
+                        .hasAnyRole("DIRECTOR", "ADMIN", "TEACHER")
 
                         .anyRequest().authenticated()
                 )

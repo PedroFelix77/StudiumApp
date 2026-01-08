@@ -7,16 +7,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface ClassroomRepository extends JpaRepository<Classroom, UUID> {
-    @Query("SELECT COUNT(c) FROM Classroom c " +
-            "WHERE c.discipline.id = :disciplineId " +
-            "AND c.date BETWEEN :startDate AND :endDate")
-    Long countByDisciplineIdAndDateBetween(
-            @Param("disciplineId") UUID disciplineId,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate
+    Optional<Classroom> findByClassEntityIdAndDisciplineId(
+            UUID classId,
+            UUID disciplineId
     );
 }

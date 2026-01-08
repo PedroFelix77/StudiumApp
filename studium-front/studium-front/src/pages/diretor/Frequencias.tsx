@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { api } from "@/services/api"
 import {
   BookOpen,
@@ -14,18 +15,22 @@ import {
 
 type StatusFrequency = "PRESENT" | "ABSENT" | "JUSTIFIED"
 
+type StudentWithRegistration = {
+  id: string
+  name: string
+  registration?: string
+  registrationId: string
+}
+
 interface FrequencyResponseDTO {
   id: string
   attendanceDate: string
   statusFrequency: StatusFrequency
-
   studentId: string
   studentName: string
   studentRegistration?: string
-
   courseId: string
   courseName: string
-
   disciplineId: string
   disciplineName: string
 }
@@ -54,27 +59,55 @@ interface StudentGroup {
 
 export default function DiretorFrequencias() {
   const [selectedCourse, setSelectedCourse] = useState("")
-  const [selectedStudent, setSelectedStudent] = useState("")
   const [viewMode, setViewMode] = useState<"byCourse" | "byStudent">("byCourse")
   const [frequencies, setFrequencies] = useState<FrequencyResponseDTO[]>([])
   const [courses, setCourses] = useState<{ id: string; name: string }[]>([])
-  const [students, setStudents] = useState<{ id: string; name: string; registration?: string }[]>([])
+  const [students, setStudents] = useState<StudentWithRegistration[]>([])
   const [loading, setLoading] = useState(false)
-  const [page, setPage] = useState(0)
-  const [total, setTotal] = useState(0)
+  const [classes, setClasses] = useState<{ id: string; name: string }[]>([])
+  const [disciplines, setDisciplines] = useState<{ id: string; name: string }[]>([])
+  const [attendanceDate, setAttendanceDate] = useState(
+    new Date().toISOString().split("T")[0]
+  )
+  const [selectedClass, setSelectedClass] = useState("")
+  const [selectedDiscipline, setSelectedDiscipline] = useState("")
 
   /* =======================
      LOADERS INICIAIS
   ======================= */
 
   useEffect(() => {
+    if (!selectedCourse) {
+      setClasses([])
+      setDisciplines([])
+      setSelectedClass("")
+      setSelectedDiscipline("")
+      return
+    }
+
+    loadClassesByCourse()
+    loadDisciplinesByCourse()
+  }, [selectedCourse])
+
+  useEffect(() => {
+    if (selectedCourse && selectedClass) {
+      loadStudentsByClass()
+    } else {
+      setStudents([])
+    }
+  }, [selectedCourse, selectedClass])
+
+  useEffect(() => {
     loadCourses()
-    loadStudents()
   }, [])
 
   useEffect(() => {
     loadFrequencies()
-  }, [selectedCourse, selectedStudent, page])
+  }, [
+    selectedCourse,
+    selectedClass,
+    selectedDiscipline
+  ])
 
   async function loadCourses() {
     try {
@@ -82,10 +115,8 @@ export default function DiretorFrequencias() {
       setCourses(res.data.content || [])
     } catch (err: any) {
       console.error("Erro ao carregar cursos", err)
-      // Se der 403, tenta buscar apenas os cursos da instituição do diretor
       if (err?.response?.status === 403) {
         try {
-          // Tenta endpoint alternativo ou deixa vazio
           setCourses([])
         } catch (e) {
           console.error("Erro ao carregar cursos alternativo", e)
@@ -94,69 +125,114 @@ export default function DiretorFrequencias() {
     }
   }
 
-  async function loadStudents() {
+  async function loadClassesByCourse() {
     try {
-      const res = await api.get("/api/students", { params: { page: 0, size: 100 } })
-      setStudents(res.data.content || [])
-    } catch (err: any) {
-      console.error("Erro ao carregar alunos", err)
-      if (err?.response?.status === 403) {
-        setStudents([])
-      }
+      const res = await api.get(`/api/classes/course/${selectedCourse}`)
+      setClasses(res.data)
+    } catch (err) {
+      console.error("Erro ao carregar turmas", err)
+      setClasses([])
+    }
+  }
+
+  async function loadDisciplinesByCourse() {
+    try {
+      const res = await api.get(`/api/disciplines/course/${selectedCourse}`)
+      setDisciplines(res.data)
+    } catch (err) {
+      console.error("Erro ao carregar disciplinas", err)
+      setDisciplines([])
     }
   }
 
   async function loadFrequencies() {
+    if (!selectedCourse || !selectedClass || !selectedDiscipline) {
+      setFrequencies([])
+      return
+    }
     setLoading(true)
     try {
-      let res
-
-      // Endpoint específico para diretor quando tem curso selecionado
-      if (selectedCourse) {
-        const params: any = {
+      const res = await api.get("/api/frequencies/filter", {
+        params: {
           courseId: selectedCourse,
-          page,
-          size: 20
+          classId: selectedClass,
+          disciplineId: selectedDiscipline,
+          size: 50
         }
-        // Note: studentId não está no endpoint /filter/course, mas pode ser filtrado depois
-        res = await api.get("/api/frequencies/filter/course", { params })
+      })
 
-        // Se tiver studentId selecionado, filtra no frontend
-        let filtered = res.data.content || []
-        if (selectedStudent) {
-          filtered = filtered.filter((f: FrequencyResponseDTO) => f.studentId === selectedStudent)
-        }
-        setFrequencies(filtered)
-        setTotal(filtered.length)
-      } else {
-        // Tenta usar o filtro global (pode não ter permissão)
-        try {
-          const params: any = {
-            page,
-            size: 20
-          }
-          if (selectedStudent) params.studentId = selectedStudent
-
-          res = await api.get("/api/frequencies/filter", { params })
-          setFrequencies(res.data.content || [])
-          setTotal(res.data.totalElements || 0)
-        } catch (globalErr: any) {
-          // Se o filtro global não funcionar, limpa os dados
-          if (globalErr?.response?.status === 403) {
-            console.warn("Acesso negado ao filtro global. Selecione um curso para visualizar frequências.")
-            setFrequencies([])
-            setTotal(0)
-          } else {
-            throw globalErr
-          }
-        }
-      }
-    } catch (err: any) {
+      setFrequencies(res.data.content || [])
+    } catch (err) {
       console.error("Erro ao carregar frequências", err)
       setFrequencies([])
-      setTotal(0)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function loadStudentsByClass() {
+    try {
+      const res = await api.get(
+        `/api/registrations/class/${selectedClass}/students`
+      )
+
+      const normalized = res.data.map((r: any) => ({
+        id: r.studentId,
+        name: r.studentName,
+        registration: r.registrationNumber,
+        registrationId: r.registrationId
+      }))
+
+      setStudents(normalized)
+    } catch (err) {
+      console.error("Erro ao carregar alunos da turma", err)
+      setStudents([])
+    }
+  }
+
+  async function handleFrequency(
+    student: StudentWithRegistration,
+    status: StatusFrequency
+  ) {
+    try {
+      if (!selectedDiscipline) {
+        console.error("Disciplina não selecionada")
+        return
+      }
+      if (!student.registrationId) {
+        console.error("Aluno sem registrationId", student)
+        return
+      }
+
+      const existing = frequencies.find(
+        f =>
+          f.studentId === student.id &&
+          f.attendanceDate === attendanceDate &&
+          f.disciplineId === selectedDiscipline
+      )
+
+      if (existing) {
+        const res = await api.put(`/api/frequencies/${existing.id}`, {
+          statusFrequency: status
+        })
+
+        setFrequencies(prev =>
+          prev.map(f => (f.id === existing.id ? res.data : f))
+        )
+      } else {
+        const payload = {
+          registrationId: student.registrationId,
+          disciplineId: selectedDiscipline,
+          attendanceDate,
+          statusFrequency: status
+        }
+        console.log("POST /api/frequencies payload:", payload)
+
+        const res = await api.post("/api/frequencies/by-registration", payload)
+        setFrequencies(prev => [...prev, res.data])
+      }
+    } catch (err) {
+      console.error("Erro ao lançar frequência", err)
     }
   }
 
@@ -235,7 +311,6 @@ export default function DiretorFrequencias() {
           course.totalClasses > 0
             ? (course.presentCount / course.totalClasses) * 100
             : 0
-
         present += course.presentCount
         total += course.totalClasses
       })
@@ -251,6 +326,26 @@ export default function DiretorFrequencias() {
     if (rate >= 50) return "text-yellow-600"
     return "text-red-600"
   }
+
+  const courseToRender = useMemo(() => {
+    if (Object.values(byCourse).length > 0) {
+      return Object.values(byCourse)
+    }
+
+    if (students.length > 0 && selectedCourse) {
+      const course = courses.find(c => c.id === selectedCourse)
+
+      return [
+        {
+          courseId: selectedCourse,
+          courseName: course?.name ?? "Curso",
+          attendances: []
+        }
+      ]
+    }
+
+    return []
+  }, [byCourse, students, selectedCourse, courses])
 
   /* =======================
      RENDER
@@ -285,19 +380,42 @@ export default function DiretorFrequencias() {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Aluno</label>
+              <label className="text-sm font-medium mb-2 block">Turma</label>
               <select
-                className="w-full h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-                value={selectedStudent}
-                onChange={e => setSelectedStudent(e.target.value)}
+                className="w-full h-9 rounded-md border px-3 text-sm"
+                value={selectedClass}
+                onChange={e => setSelectedClass(e.target.value)}
+                disabled={!selectedCourse}
               >
-                <option value="">Todos os alunos</option>
-                {students.map(s => (
-                  <option key={s.id} value={s.id}>
-                    {s.registration ? `${s.registration} - ` : ""}{s.name}
-                  </option>
+                <option value="">Selecione</option>
+                {classes.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Disciplina</label>
+              <select
+                className="w-full h-9 rounded-md border px-3 text-sm"
+                value={selectedDiscipline}
+                onChange={e => setSelectedDiscipline(e.target.value)}
+                disabled={!selectedClass}
+              >
+                <option value="">Selecione</option>
+                {disciplines.map(d => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Data da Aula</label>
+              <Input
+                type="date"
+                value={attendanceDate}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAttendanceDate(e.target.value)}
+              />
             </div>
 
             <div className="md:col-span-2">
@@ -331,15 +449,14 @@ export default function DiretorFrequencias() {
 
       {!loading && viewMode === "byCourse" && (
         <div className="space-y-4">
-          {Object.values(byCourse).length === 0 ? (
+          {courseToRender.length === 0 ? (
             <Card>
               <CardContent className="py-8 text-center text-muted-foreground">
-                Nenhuma frequência encontrada
+                Nenhum aluno encontrado para esta turma
               </CardContent>
             </Card>
           ) : (
-            Object.values(byCourse).map(course => {
-              // Agrupar por aluno para mostrar estatísticas
+            courseToRender.map((course, courseIndex) => {
               const studentStats = course.attendances.reduce((acc, att) => {
                 if (!acc[att.studentId]) {
                   acc[att.studentId] = {
@@ -368,7 +485,7 @@ export default function DiretorFrequencias() {
               }>);
 
               return (
-                <Card key={course.courseId}>
+                <Card key={course.courseId || `course-${courseIndex}`}>
                   <CardHeader>
                     <div className="flex justify-between items-center">
                       <div>
@@ -411,24 +528,64 @@ export default function DiretorFrequencias() {
                           <th className="p-2 text-center">Justificado</th>
                           <th className="p-2 text-center">Total</th>
                           <th className="p-2 text-center">Frequência</th>
+                          <th className="p-2 text-center">Lançar</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {Object.values(studentStats).map((stats) => {
+                        {students.map((student, studentIndex) => {
+                          const stats = studentStats[student.id] || {
+                            present: 0,
+                            absent: 0,
+                            justified: 0,
+                            dates: new Set<string>(),
+                          };
+
                           const total = stats.dates.size;
-                          const rate = total > 0 ? ((stats.present + stats.justified) / total) * 100 : 0;
+                          const rate =
+                            total > 0
+                              ? ((stats.present + stats.justified) / total) * 100
+                              : 0;
+
                           return (
-                            <tr key={stats.student.id} className="border-b hover:bg-muted/50">
-                              <td className="p-2 font-medium">{stats.student.name}</td>
-                              <td className="p-2 text-muted-foreground">{stats.student.registration ?? "-"}</td>
-                              <td className="p-2 text-center text-green-600 font-semibold">{stats.present}</td>
-                              <td className="p-2 text-center text-red-600 font-semibold">{stats.absent}</td>
-                              <td className="p-2 text-center text-blue-600 font-semibold">{stats.justified}</td>
+                            <tr
+                              key={`${course.courseId || 'course'}-${student.id || `student-${studentIndex}`}`}
+                              className="border-b hover:bg-muted/50"
+                            >
+                              <td className="p-2 font-medium">
+                                {student.name}
+                              </td>
+                              <td className="p-2 text-muted-foreground">
+                                {student.registration || "-"}
+                              </td>
+                              <td className="p-2 text-center text-green-600 font-semibold">
+                                {stats.present}
+                              </td>
+                              <td className="p-2 text-center text-red-600 font-semibold">
+                                {stats.absent}
+                              </td>
+                              <td className="p-2 text-center text-blue-600 font-semibold">
+                                {stats.justified}
+                              </td>
                               <td className="p-2 text-center">{total}</td>
                               <td className="p-2 text-center">
                                 <span className={`font-semibold ${rateColor(rate)}`}>
                                   {rate.toFixed(1)}%
                                 </span>
+                              </td>
+                              <td className="p-2 text-center">
+                                <div className="flex justify-center gap-2">
+                                  <Button onClick={() => handleFrequency(student, "PRESENT")}>
+                                    Presente
+                                  </Button>
+
+                                  <Button variant="outline" onClick={() => handleFrequency(student, "ABSENT")}>
+                                    Falta
+                                  </Button>
+
+                                  <Button variant="secondary" onClick={() => handleFrequency(student, "JUSTIFIED")}>
+                                    Justificada
+                                  </Button>
+                                </div>
                               </td>
                             </tr>
                           );
@@ -452,8 +609,8 @@ export default function DiretorFrequencias() {
               </CardContent>
             </Card>
           ) : (
-            Object.values(byStudent).map(student => (
-              <Card key={student.studentId}>
+            Object.values(byStudent).map((student, studentIndex) => (
+              <Card key={student.studentId || `student-${studentIndex}`}>
                 <CardHeader>
                   <div className="flex justify-between items-center">
                     <div>
@@ -482,8 +639,11 @@ export default function DiretorFrequencias() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {student.courses.map(course => (
-                      <div key={course.courseId} className="border rounded-lg p-4 hover:bg-muted/30 transition-colors">
+                    {student.courses.map((course, courseIndex) => (
+                      <div
+                        key={`${student.studentId || 'student'}-${course.courseId || `course-${courseIndex}`}`}
+                        className="border rounded-lg p-4 hover:bg-muted/30 transition-colors"
+                      >
                         <div className="flex justify-between items-center mb-3">
                           <h4 className="font-semibold text-lg">{course.courseName}</h4>
                           {course.attendanceRate !== undefined && (
@@ -512,34 +672,6 @@ export default function DiretorFrequencias() {
             ))
           )}
         </div>
-      )}
-
-      {/* PAGINAÇÃO */}
-      {total > 0 && (
-        <Card>
-          <CardContent className="py-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">
-                {total} {total === 1 ? "registro encontrado" : "registros encontrados"}
-              </span>
-              <div className="space-x-2">
-                <Button
-                  disabled={page === 0}
-                  onClick={() => setPage(p => p - 1)}
-                  variant="outline"
-                >
-                  Anterior
-                </Button>
-                <Button
-                  onClick={() => setPage(p => p + 1)}
-                  disabled={frequencies.length < 20}
-                >
-                  Próxima
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       )}
     </div>
   )

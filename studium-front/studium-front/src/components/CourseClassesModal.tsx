@@ -17,16 +17,12 @@ import { api } from "@/services/api"
 import { useAuth } from "@/context/AuthContext"
 import ClassStudentsModal from "@/components/ClassStudentsModal"
 import TeacherAllocationModal from "@/components/TeacherAllocationModal"
+import ClassDisciplineModal from "@/components/ClassDisciplinesModal"
 
 interface Props {
     open: boolean
     onOpenChange: (open: boolean) => void
     courseId: string
-}
-interface Discipline {
-    id: string
-    name: string
-    code?: string
 }
 
 interface ClassItem {
@@ -49,11 +45,8 @@ export default function CourseClassesModal({
     const [selectedClassId, setSelectedClassId] = useState<string | null>(null)
     const [openStudentsModal, setOpenStudentsModal] = useState(false)
     const [openTeacherModal, setOpenTeacherModal] = useState(false)
-
-    const [disciplines, setDisciplines] = useState<Discipline[]>([])
-    const [disciplineName, setDisciplineName] = useState("")
-    const [disciplineCode, setDisciplineCode] = useState("")
-    const [loadingDiscipline, setLoadingDiscipline] = useState(false)
+    const [openClassDisciplineModal, setOpenClassDisciplineModal] = useState(false)
+    const [selectedClassForDiscipline, setSelectedClassForDiscipline] = useState<string | null>(null)
 
     // form
     const [name, setName] = useState("")
@@ -63,7 +56,6 @@ export default function CourseClassesModal({
     useEffect(() => {
         if (open) {
             loadClasses()
-            loadDisciplines()
         }
     }, [open, courseId, user])
 
@@ -102,35 +94,6 @@ export default function CourseClassesModal({
             console.error("Erro ao criar turma", err)
         } finally {
             setLoading(false)
-        }
-    }
-
-    const loadDisciplines = async () => {
-        try {
-            const res = await api.get(`/api/disciplines/course/${courseId}`)
-            setDisciplines(res.data)
-        } catch (err) {
-            console.error("Erro ao carregar disciplinas", err)
-            setDisciplines([])
-        }
-    }
-
-    const handleCreateDiscipline = async () => {
-        setLoadingDiscipline(true)
-        try {
-            await api.post("/api/disciplines", {
-                name: disciplineName,
-                code: disciplineCode,
-                courseId
-            })
-
-            setDisciplineName("")
-            setDisciplineCode("")
-            loadDisciplines()
-        } catch (err) {
-            console.error("Erro ao criar disciplina", err)
-        } finally {
-            setLoadingDiscipline(false)
         }
     }
 
@@ -176,6 +139,16 @@ export default function CourseClassesModal({
                                         <Users size={14} />
                                         Alunos
                                     </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            setSelectedClassForDiscipline(c.id)
+                                            setOpenClassDisciplineModal(true)
+                                        }}
+                                    >
+                                        Disciplinas
+                                    </Button>
 
                                     {/* PROFESSORES */}
                                     {user?.role !== "TEACHER" && (
@@ -205,30 +178,6 @@ export default function CourseClassesModal({
 
                     <hr />
 
-                    <div className="space-y-3">
-                        <h3 className="font-medium text-sm">Disciplinas do Curso</h3>
-
-                        {disciplines.map(d => (
-                            <div
-                                key={d.id}
-                                className="border rounded-md p-2 text-sm flex justify-between"
-                            >
-                                <span>{d.name}</span>
-                                {d.code && (
-                                    <span className="text-muted-foreground">{d.code}</span>
-                                )}
-                            </div>
-                        ))}
-
-                        {disciplines.length === 0 && (
-                            <p className="text-sm text-muted-foreground">
-                                Nenhuma disciplina cadastrada
-                            </p>
-                        )}
-                    </div>
-
-
-
                     {/* FORM CRIAR TURMA */}
                     {user?.role !== "TEACHER" && (
                         <div className="space-y-3">
@@ -252,34 +201,7 @@ export default function CourseClassesModal({
                         </div>
                     )}
 
-                    {user?.role !== "TEACHER" && (
-                        <>
-                            <hr />
-
-                            <div className="space-y-3">
-                                <Label>Nova Disciplina</Label>
-
-                                <Input
-                                    placeholder="Nome da disciplina"
-                                    value={disciplineName}
-                                    onChange={e => setDisciplineName(e.target.value)}
-                                />
-
-                                <Input
-                                    placeholder="Código (opcional)"
-                                    value={disciplineCode}
-                                    onChange={e => setDisciplineCode(e.target.value)}
-                                />
-
-                                <Button
-                                    onClick={handleCreateDiscipline}
-                                    disabled={loadingDiscipline || !disciplineName}
-                                >
-                                    {loadingDiscipline ? "Criando..." : "Criar Disciplina"}
-                                </Button>
-                            </div>
-                        </>
-                    )}
+                    <hr />
 
 
                     <DialogFooter>
@@ -311,6 +233,15 @@ export default function CourseClassesModal({
                     onOpenChange={setOpenTeacherModal}
                     courseId={courseId}
                     classId={selectedClassId}
+                />
+            )}
+
+            {selectedClassForDiscipline && (
+                <ClassDisciplineModal
+                    open={openClassDisciplineModal}
+                    onOpenChange={setOpenClassDisciplineModal}
+                    courseId={courseId}
+                    classId={selectedClassForDiscipline}
                 />
             )}
         </>

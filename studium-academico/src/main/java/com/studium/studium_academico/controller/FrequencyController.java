@@ -1,5 +1,6 @@
 package com.studium.studium_academico.controller;
 
+import com.studium.studium_academico.business.dto.request.FrequencyByRegistrationRequestDTO;
 import com.studium.studium_academico.business.dto.request.FrequencyRequestDTO;
 import com.studium.studium_academico.business.dto.response.FrequencyResponseDTO;
 import com.studium.studium_academico.business.service.FrequencyService;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -160,5 +162,16 @@ public class FrequencyController {
                 courseId, disciplineId, classId, status, startDate, endDate, pageable
         );
         return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/by-registration")
+    @PreAuthorize("hasAnyRole('TEACHER', 'DIRECTOR')")
+    public ResponseEntity<FrequencyResponseDTO> createByRegistration(
+            @RequestBody FrequencyByRegistrationRequestDTO dto
+    ) {
+        FrequencyResponseDTO response =
+                frequencyService.createFrequencyByRegistration(dto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

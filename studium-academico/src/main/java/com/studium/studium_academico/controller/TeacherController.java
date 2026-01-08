@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -26,6 +27,14 @@ public class TeacherController {
     ) {
         return ResponseEntity.ok(teacherService.list(q, pageable));
     }
+
+    @GetMapping("/course/{courseId}")
+    public List<TeacherResponseDTO> findTeachersByCourse(
+            @PathVariable UUID courseId
+    ) {
+        return teacherService.findByCourse(courseId);
+    }
+
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('DIRECTOR','ADMIN','TEACHER')")

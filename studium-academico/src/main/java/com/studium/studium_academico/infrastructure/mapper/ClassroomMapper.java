@@ -9,11 +9,5 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring", uses = {ClassesMapper.class, DisciplineMapper.class})
 public interface ClassroomMapper {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "classEntity", ignore = true)
-    @Mapping(target = "discipline", ignore = true)
-    @Mapping(target = "frequencies", ignore = true)
-    Classroom toEntity(ClassroomRequestDTO dto);
-
     ClassroomResponseDTO toResponse(Classroom classroom);
 }

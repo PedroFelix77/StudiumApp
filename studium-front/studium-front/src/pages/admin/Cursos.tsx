@@ -15,7 +15,7 @@ export default function AdminCursos() {
   const [loading, setLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [showRegistrationModal, setShowRegistrationModal] = useState(false)
-  const [selectedCourseId, setSelectedCourseId] = useState<string>("")
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null)
   const [openClasses, setOpenClasses] = useState(false)
 
   const loadCourses = async () => {
@@ -119,24 +119,25 @@ export default function AdminCursos() {
         </div>
       )}
 
+      {selectedCourseId && (
+        <CourseClassesModal
+          open={openClasses}
+          onOpenChange={setOpenClasses}
+          courseId={selectedCourseId}
+        />
+      )}
       <CourseModal
         open={showModal}
         onOpenChange={setShowModal}
         onSuccess={loadCourses}
       />
 
-      <RegistrationModal
-        open={showRegistrationModal}
-        onOpenChange={setShowRegistrationModal}
-        courseId={selectedCourseId}
-        onSuccess={loadCourses}
-      />
-
       {selectedCourseId && (
-        <CourseClassesModal
-          open={openClasses}
-          onOpenChange={setOpenClasses}
+        <RegistrationModal
+          open={showRegistrationModal}
+          onOpenChange={setShowRegistrationModal}
           courseId={selectedCourseId}
+          onSuccess={loadCourses}
         />
       )}
     </div>

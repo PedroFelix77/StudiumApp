@@ -14,13 +14,12 @@ interface Department {
   courseCount?: number;
 }
 
-export default function DepartamentoAdmin() {
+export default function AdminDepartamentos() {
   const [q, setQ] = useState("");
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
   const [pageNumber, setPageNumber] = useState(0);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   useEffect(() => {
     fetchDepartments();
@@ -29,9 +28,11 @@ export default function DepartamentoAdmin() {
   async function fetchDepartments() {
     setLoading(true);
     try {
-      const res = await api.get("/api/departments", { params: { q, page: pageNumber, size: 10 } });
-      setDepartments(res.data.content || []);
-      setTotal(res.data.totalElements || 0);
+      const res = await api.get("/api/departments");
+      const data = Array.isArray(res.data) ? res.data : [];
+
+      setDepartments(data);
+      setTotal(data.length);
     } catch (err) {
       console.error("Erro ao carregar departamentos", err);
     } finally {
@@ -49,6 +50,8 @@ export default function DepartamentoAdmin() {
       alert("Erro ao desativar departamento");
     }
   }
+
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   return (
     <div className="space-y-6">

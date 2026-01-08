@@ -4,9 +4,11 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record ClassroomRequestDTO(
-        LocalDate date,
-        String content,
+        String name,
+        String code,
+        Integer weeklyWorkLoad,
         UUID classId,
-        UUID disciplineId
+        UUID disciplineId,
+        UUID teacherId
 ) {
 }
