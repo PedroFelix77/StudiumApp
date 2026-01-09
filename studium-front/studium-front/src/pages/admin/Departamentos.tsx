@@ -14,7 +14,7 @@ interface Department {
   courseCount?: number;
 }
 
-export default function AdminDepartamentos() {
+export default function AdminDepartamentosPage() {
   const [q, setQ] = useState("");
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);

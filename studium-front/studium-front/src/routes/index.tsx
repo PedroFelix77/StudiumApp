@@ -16,7 +16,6 @@ import AdminFrequencias from "../pages/admin/Frequencias";
 
 // PROFESSOR
 import ProfDashboard from "../pages/professor/Dashboard";
-import ProfAlunos from "../pages/professor/Alunos";
 import ProfCursos from "../pages/professor/Cursos";
 import ProfNotas from "../pages/professor/Notas";
 import ProfFrequencias from "../pages/professor/Frequencia";
@@ -84,7 +83,6 @@ export function AppRoutes() {
           {/* PROFESSOR */}
           <Route path="/professor" element={<ProtectedRoute allowedRoles={['TEACHER']}><AppLayout /></ProtectedRoute>}>
             <Route path="dashboard" element={<ProfDashboard />} />
-            <Route path="alunos" element={<ProfAlunos />} />
             <Route path="cursos" element={<ProfCursos />} />
             <Route path="frequencias" element={<ProfFrequencias />} />
             <Route path="notas" element={<ProfNotas />} />

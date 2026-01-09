@@ -2,6 +2,7 @@ package com.studium.studium_academico.business.service;
 
 import com.studium.studium_academico.business.dto.request.FrequencyByRegistrationRequestDTO;
 import com.studium.studium_academico.business.dto.request.FrequencyRequestDTO;
+import com.studium.studium_academico.business.dto.response.ClassroomResponseDTO;
 import com.studium.studium_academico.business.dto.response.FrequencyResponseDTO;
 import com.studium.studium_academico.infrastructure.entity.*;
 import com.studium.studium_academico.infrastructure.exceptions.BusinessValidationException;
@@ -164,6 +165,7 @@ public class FrequencyService {
         Frequency updated = frequencyRepository.save(frequency);
         return frequencyMapper.toResponse(updated);
     }
+
 
     @Transactional
     public void deleteFrequency(UUID id) {

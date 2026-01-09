@@ -77,16 +77,28 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/teachers/course/**")
                         .hasAnyRole("DIRECTOR", "ADMIN")
                         // GRADES
-                        .requestMatchers(HttpMethod.GET, "/api/grades/**")
-                        .hasAnyRole("STUDENT", "TEACHER", "DIRECTOR", "ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/grades/**")
-                        .hasAnyRole("TEACHER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/grades")
+                        .hasAnyRole("DIRECTOR", "ADMIN", "TEACHER")
                         .requestMatchers(HttpMethod.PUT, "/api/grades/**")
-                        .hasAnyRole("TEACHER", "ADMIN")
+                        .hasAnyRole("DIRECTOR", "ADMIN", "TEACHER")
                         .requestMatchers(HttpMethod.DELETE, "/api/grades/**")
-                        .hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/grades/filter/teacher")
-                        .hasAnyRole("DIRECTOR", "TEACHER")
+                        .hasAnyRole("DIRECTOR", "ADMIN")
+
+                        // Endpoints de leitura
+                        .requestMatchers(HttpMethod.GET, "/api/grades")
+                        .hasAnyRole("DIRECTOR", "ADMIN", "TEACHER")
+                        .requestMatchers(HttpMethod.GET, "/api/grades/{id}")
+                        .hasAnyRole("DIRECTOR", "ADMIN", "TEACHER")
+                        .requestMatchers(HttpMethod.GET, "/api/grades/by-class-discipline")
+                        .hasAnyRole("DIRECTOR", "ADMIN", "TEACHER")
+                        .requestMatchers(HttpMethod.GET, "/api/grades/by-student-discipline")
+                        .hasAnyRole("DIRECTOR", "ADMIN", "TEACHER", "STUDENT")
+                        .requestMatchers(HttpMethod.GET, "/api/grades/by-registration-discipline")
+                        .hasAnyRole("DIRECTOR", "ADMIN", "TEACHER")
+                        .requestMatchers(HttpMethod.GET, "/api/grades/filter/**")
+                        .hasAnyRole("DIRECTOR", "ADMIN", "TEACHER")
+                        .requestMatchers(HttpMethod.GET, "/api/grades/average/**")
+                        .hasAnyRole("DIRECTOR", "ADMIN", "TEACHER", "STUDENT")
 
                         // FREQUENCIES
                         .requestMatchers(HttpMethod.POST, "/api/frequencies").hasAnyRole("TEACHER", "DIRECTOR")
@@ -103,10 +115,19 @@ public class SecurityConfig {
                         .requestMatchers("/api/transcripts/**")
                         .hasAnyRole("STUDENT", "DIRECTOR", "ADMIN")
 
+
                         // TEACHER CLASS
+                        .requestMatchers(HttpMethod.GET, "/api/teacher-classes/teacher/*/classes")
+                        .hasRole("TEACHER")
+
+                        .requestMatchers(HttpMethod.GET, "/api/teacher-classes/teacher/*/disciplines")
+                        .hasRole("TEACHER")
+
+                        .requestMatchers(HttpMethod.GET, "/api/teacher-classes/teacher/*/course/*")
+                        .hasAnyRole("TEACHER", "DIRECTOR", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/teacher-classes")
                         .hasAnyRole("DIRECTOR", "ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/teacher-classes")
+                        .requestMatchers(HttpMethod.GET, "/api/teacher-classes/**")
                         .hasAnyRole("DIRECTOR", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/teacher-classes/{id}") // ADICIONADO
                         .hasAnyRole("DIRECTOR", "ADMIN", "TEACHER")

@@ -1,6 +1,8 @@
 package com.studium.studium_academico.controller;
 
 import com.studium.studium_academico.business.dto.request.TeacherClassCreateDTO;
+import com.studium.studium_academico.business.dto.response.ClassResponseDTO;
+import com.studium.studium_academico.business.dto.response.DisciplineResponseDTO;
 import com.studium.studium_academico.business.dto.response.TeacherClassResponseDTO;
 import com.studium.studium_academico.business.service.TeacherClassService;
 import jakarta.validation.Valid;
@@ -15,11 +17,11 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/teacher-classes")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('DIRECTOR') or hasRole('ADMIN')")
 public class TeacherClassesController {
 
     private final TeacherClassService service;
 
+    @PreAuthorize("hasRole('DIRECTOR') or hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<TeacherClassResponseDTO> create(
             @RequestBody @Valid TeacherClassCreateDTO dto
@@ -27,36 +29,37 @@ public class TeacherClassesController {
         return ResponseEntity.ok(service.create(dto));
     }
 
+    @PreAuthorize("hasRole('DIRECTOR') or hasRole('ADMIN')")
     @GetMapping
     public List<TeacherClassResponseDTO> findAll() {
         return service.findAll();
     }
 
-    @GetMapping("/teacher/{teacherId}")
-    public List<TeacherClassResponseDTO> findByTeacher(
+    // 👇 PROFESSOR PODE ACESSAR
+    @PreAuthorize("hasRole('TEACHER') or hasRole('DIRECTOR') or hasRole('ADMIN')")
+    @GetMapping("/teacher/{teacherId}/classes")
+    public ResponseEntity<List<ClassResponseDTO>> getClassesByTeacher(
             @PathVariable UUID teacherId
     ) {
-        return service.findByTeacher(teacherId);
+        return ResponseEntity.ok(service.findClassesByTeacher(teacherId));
     }
 
-    @GetMapping("/teacher/{teacherId}/course/{courseId}")
-    public List<TeacherClassResponseDTO> findByTeacherAndCourse(
+    // 👇 PROFESSOR PODE ACESSAR
+    @PreAuthorize("hasRole('TEACHER') or hasRole('DIRECTOR') or hasRole('ADMIN')")
+    @GetMapping("/teacher/{teacherId}/disciplines")
+    public ResponseEntity<List<DisciplineResponseDTO>> getDisciplinesByTeacherAndClass(
             @PathVariable UUID teacherId,
-            @PathVariable UUID courseId
+            @RequestParam UUID classId
     ) {
-        return service.findByTeacherAndCourse(teacherId, courseId);
+        return ResponseEntity.ok(
+                service.findDisciplinesByTeacherAndClass(teacherId, classId)
+        );
     }
 
+    @PreAuthorize("hasRole('DIRECTOR') or hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/class/{classId}")
-    public List<TeacherClassResponseDTO> findByClass(
-            @PathVariable UUID classId
-    ) {
-        return service.findByClass(classId);
     }
 }

@@ -1,26 +1,26 @@
 package com.studium.studium_academico.business.service;
 
 import com.studium.studium_academico.business.dto.request.ClassroomRequestDTO;
+import com.studium.studium_academico.business.dto.response.ClassResponseDTO;
 import com.studium.studium_academico.business.dto.response.ClassroomResponseDTO;
-import com.studium.studium_academico.infrastructure.entity.Classes;
-import com.studium.studium_academico.infrastructure.entity.Classroom;
-import com.studium.studium_academico.infrastructure.entity.Discipline;
-import com.studium.studium_academico.infrastructure.entity.Teacher;
+import com.studium.studium_academico.business.dto.response.DisciplineResponseDTO;
+import com.studium.studium_academico.infrastructure.entity.*;
 import com.studium.studium_academico.infrastructure.exceptions.ResourceNotFoundException;
 import com.studium.studium_academico.infrastructure.mapper.ClassroomMapper;
-import com.studium.studium_academico.infrastructure.repository.ClassesRepository;
-import com.studium.studium_academico.infrastructure.repository.ClassroomRepository;
-import com.studium.studium_academico.infrastructure.repository.DisciplineRepository;
-import com.studium.studium_academico.infrastructure.repository.TeacherRepository;
+import com.studium.studium_academico.infrastructure.repository.*;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class ClassroomService {
     @Autowired
     private ClassroomRepository classroomRepository;
@@ -32,6 +32,8 @@ public class ClassroomService {
     private ClassroomMapper mapper;
     @Autowired
     private TeacherRepository teacherRepository;
+    @Autowired
+    private TeacherClassRepository teacherClassRepository;
 
     @Transactional
     public ClassroomResponseDTO create(ClassroomRequestDTO dto) {
@@ -89,6 +91,13 @@ public class ClassroomService {
         classroom.setTeacher(teacher);
 
         return mapper.toResponse(classroomRepository.save(classroom));
+    }
+
+    public List<ClassroomResponseDTO> findByTeacher(UUID teacherId) {
+        return classroomRepository.findByTeacher_Id(teacherId)
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
     }
 
 

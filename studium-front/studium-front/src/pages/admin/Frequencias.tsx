@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { api } from "@/services/api"
 import {
   BookOpen,
@@ -14,18 +15,22 @@ import {
 
 type StatusFrequency = "PRESENT" | "ABSENT" | "JUSTIFIED"
 
+type StudentWithRegistration = {
+  id: string
+  name: string
+  registration?: string
+  registrationId: string
+}
+
 interface FrequencyResponseDTO {
   id: string
   attendanceDate: string
   statusFrequency: StatusFrequency
-
   studentId: string
   studentName: string
   studentRegistration?: string
-
   courseId: string
   courseName: string
-
   disciplineId: string
   disciplineName: string
 }
@@ -52,16 +57,18 @@ interface StudentGroup {
    COMPONENTE
 ======================= */
 
-export default function AdminFrequencias() {
+export default function AdminFrequenciasPage() {
   const [selectedCourse, setSelectedCourse] = useState("")
   const [viewMode, setViewMode] = useState<"byCourse" | "byStudent">("byCourse")
   const [frequencies, setFrequencies] = useState<FrequencyResponseDTO[]>([])
   const [courses, setCourses] = useState<{ id: string; name: string }[]>([])
-  const [students, setStudents] = useState<{ id: string; name: string; registration?: string }[]>([])
+  const [students, setStudents] = useState<StudentWithRegistration[]>([])
   const [loading, setLoading] = useState(false)
   const [classes, setClasses] = useState<{ id: string; name: string }[]>([])
   const [disciplines, setDisciplines] = useState<{ id: string; name: string }[]>([])
-
+  const [attendanceDate, setAttendanceDate] = useState(
+    new Date().toISOString().split("T")[0]
+  )
   const [selectedClass, setSelectedClass] = useState("")
   const [selectedDiscipline, setSelectedDiscipline] = useState("")
 
@@ -102,17 +109,14 @@ export default function AdminFrequencias() {
     selectedDiscipline
   ])
 
-
   async function loadCourses() {
     try {
       const res = await api.get("/api/courses", { params: { page: 0, size: 100 } })
       setCourses(res.data.content || [])
     } catch (err: any) {
       console.error("Erro ao carregar cursos", err)
-      // Se der 403, tenta buscar apenas os cursos da instituição do diretor
       if (err?.response?.status === 403) {
         try {
-          // Tenta endpoint alternativo ou deixa vazio
           setCourses([])
         } catch (e) {
           console.error("Erro ao carregar cursos alternativo", e)
@@ -146,7 +150,6 @@ export default function AdminFrequencias() {
       setFrequencies([])
       return
     }
-
     setLoading(true)
     try {
       const res = await api.get("/api/frequencies/filter", {
@@ -167,17 +170,71 @@ export default function AdminFrequencias() {
     }
   }
 
-
   async function loadStudentsByClass() {
     try {
-      const res = await api.get(`/api/registrations/class/${selectedClass}/students`)
-      setStudents(res.data)
+      const res = await api.get(
+        `/api/registrations/class/${selectedClass}/students`
+      )
+
+      const normalized = res.data.map((r: any) => ({
+        id: r.studentId,
+        name: r.studentName,
+        registration: r.registrationNumber,
+        registrationId: r.registrationId
+      }))
+
+      setStudents(normalized)
     } catch (err) {
       console.error("Erro ao carregar alunos da turma", err)
       setStudents([])
     }
   }
 
+  async function handleFrequency(
+    student: StudentWithRegistration,
+    status: StatusFrequency
+  ) {
+    try {
+      if (!selectedDiscipline) {
+        console.error("Disciplina não selecionada")
+        return
+      }
+      if (!student.registrationId) {
+        console.error("Aluno sem registrationId", student)
+        return
+      }
+
+      const existing = frequencies.find(
+        f =>
+          f.studentId === student.id &&
+          f.attendanceDate === attendanceDate &&
+          f.disciplineId === selectedDiscipline
+      )
+
+      if (existing) {
+        const res = await api.put(`/api/frequencies/${existing.id}`, {
+          statusFrequency: status
+        })
+
+        setFrequencies(prev =>
+          prev.map(f => (f.id === existing.id ? res.data : f))
+        )
+      } else {
+        const payload = {
+          registrationId: student.registrationId,
+          disciplineId: selectedDiscipline,
+          attendanceDate,
+          statusFrequency: status
+        }
+        console.log("POST /api/frequencies payload:", payload)
+
+        const res = await api.post("/api/frequencies/by-registration", payload)
+        setFrequencies(prev => [...prev, res.data])
+      }
+    } catch (err) {
+      console.error("Erro ao lançar frequência", err)
+    }
+  }
 
   /* =======================
      AGRUPAMENTO POR CURSO
@@ -254,7 +311,6 @@ export default function AdminFrequencias() {
           course.totalClasses > 0
             ? (course.presentCount / course.totalClasses) * 100
             : 0
-
         present += course.presentCount
         total += course.totalClasses
       })
@@ -276,7 +332,6 @@ export default function AdminFrequencias() {
       return Object.values(byCourse)
     }
 
-    // NÃO EXISTE FREQUÊNCIA, MAS EXISTEM ALUNOS
     if (students.length > 0 && selectedCourse) {
       const course = courses.find(c => c.id === selectedCourse)
 
@@ -354,6 +409,15 @@ export default function AdminFrequencias() {
               </select>
             </div>
 
+            <div>
+              <label className="text-sm font-medium mb-2 block">Data da Aula</label>
+              <Input
+                type="date"
+                value={attendanceDate}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAttendanceDate(e.target.value)}
+              />
+            </div>
+
             <div className="md:col-span-2">
               <label className="text-sm font-medium mb-2 block">Visualização</label>
               <div className="flex gap-2">
@@ -392,8 +456,7 @@ export default function AdminFrequencias() {
               </CardContent>
             </Card>
           ) : (
-            courseToRender.map(course => {
-              // Agrupar por aluno para mostrar estatísticas
+            courseToRender.map((course, courseIndex) => {
               const studentStats = course.attendances.reduce((acc, att) => {
                 if (!acc[att.studentId]) {
                   acc[att.studentId] = {
@@ -422,7 +485,7 @@ export default function AdminFrequencias() {
               }>);
 
               return (
-                <Card key={course.courseId}>
+                <Card key={course.courseId || `course-${courseIndex}`}>
                   <CardHeader>
                     <div className="flex justify-between items-center">
                       <div>
@@ -469,7 +532,7 @@ export default function AdminFrequencias() {
                         </tr>
                       </thead>
                       <tbody>
-                        {students.map(student => {
+                        {students.map((student, studentIndex) => {
                           const stats = studentStats[student.id] || {
                             present: 0,
                             absent: 0,
@@ -484,10 +547,15 @@ export default function AdminFrequencias() {
                               : 0;
 
                           return (
-                            <tr key={`${course.courseId}-${student.id}`} className="border-b hover:bg-muted/50">
-                              <td className="p-2 font-medium">{student.name}</td>
+                            <tr
+                              key={`${course.courseId || 'course'}-${student.id || `student-${studentIndex}`}`}
+                              className="border-b hover:bg-muted/50"
+                            >
+                              <td className="p-2 font-medium">
+                                {student.name}
+                              </td>
                               <td className="p-2 text-muted-foreground">
-                                {student.registration ?? "-"}
+                                {student.registration || "-"}
                               </td>
                               <td className="p-2 text-center text-green-600 font-semibold">
                                 {stats.present}
@@ -506,28 +574,16 @@ export default function AdminFrequencias() {
                               </td>
                               <td className="p-2 text-center">
                                 <div className="flex justify-center gap-2">
-                                  <Button
-                                    size="sm"
-                                    variant={stats.present > 0 ? "default" : "outline"}
-                                    className="bg-green-600 hover:bg-green-700"
-                                  >
+                                  <Button onClick={() => handleFrequency(student, "PRESENT")}>
                                     Presente
                                   </Button>
 
-                                  <Button
-                                    size="sm"
-                                    variant={stats.absent > 0 ? "default" : "outline"}
-                                    className="bg-red-600 hover:bg-red-700"
-                                  >
+                                  <Button variant="outline" onClick={() => handleFrequency(student, "ABSENT")}>
                                     Falta
                                   </Button>
 
-                                  <Button
-                                    size="sm"
-                                    variant={stats.justified > 0 ? "default" : "outline"}
-                                    className="bg-blue-600 hover:bg-blue-700"
-                                  >
-                                    Just.
+                                  <Button variant="secondary" onClick={() => handleFrequency(student, "JUSTIFIED")}>
+                                    Justificada
                                   </Button>
                                 </div>
                               </td>
@@ -553,8 +609,8 @@ export default function AdminFrequencias() {
               </CardContent>
             </Card>
           ) : (
-            Object.values(byStudent).map(student => (
-              <Card key={student.studentId}>
+            Object.values(byStudent).map((student, studentIndex) => (
+              <Card key={student.studentId || `student-${studentIndex}`}>
                 <CardHeader>
                   <div className="flex justify-between items-center">
                     <div>
@@ -583,8 +639,11 @@ export default function AdminFrequencias() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {student.courses.map(course => (
-                      <div key={course.courseId} className="border rounded-lg p-4 hover:bg-muted/30 transition-colors">
+                    {student.courses.map((course, courseIndex) => (
+                      <div
+                        key={`${student.studentId || 'student'}-${course.courseId || `course-${courseIndex}`}`}
+                        className="border rounded-lg p-4 hover:bg-muted/30 transition-colors"
+                      >
                         <div className="flex justify-between items-center mb-3">
                           <h4 className="font-semibold text-lg">{course.courseName}</h4>
                           {course.attendanceRate !== undefined && (
@@ -614,8 +673,6 @@ export default function AdminFrequencias() {
           )}
         </div>
       )}
-
-
     </div>
   )
 }

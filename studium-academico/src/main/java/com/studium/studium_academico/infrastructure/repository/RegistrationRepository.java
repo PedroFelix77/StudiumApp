@@ -20,9 +20,6 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
     // Buscar matrículas por curso
     List<Registration> findByCourseId(UUID courseId);
 
-    // Buscar matrículas por turma
-    List<Registration> findByClassEntityId(UUID classId);
-
     // Buscar matrícula por número
     Optional<Registration> findByRegistrationNumber(String registrationNumber);
 
@@ -55,6 +52,11 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
     """)
     long countByTeacherId(@Param("teacherId") UUID teacherId);
 
-
+    @Query("SELECT r FROM Registration r " +
+            "JOIN FETCH r.student s " +
+            "JOIN FETCH s.user u " +
+            "WHERE r.classEntity.id = :classId " +
+            "ORDER BY u.name")
+    List<Registration> findByClassEntityId(@Param("classId") UUID classId);
 
 }

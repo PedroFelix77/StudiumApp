@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, FileText, BarChart3, Users, GraduationCap } from "lucide-react";
 import { api } from "@/services/api";
 
-export default function AdminRelatorios() {
+export default function AdminRelatoriosPage() {
   const [loading, setLoading] = useState<string | null>(null);
 
   async function generateReport(type: string) {

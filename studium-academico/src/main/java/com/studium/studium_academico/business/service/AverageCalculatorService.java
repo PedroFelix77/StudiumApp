@@ -37,36 +37,43 @@ public class AverageCalculatorService {
         BigDecimal p2 = getGrade(grades, TypeGrade.PROVA2);
         BigDecimal finalExam = getGrade(grades, TypeGrade.FINAL);
 
-        // Média inicial
-        BigDecimal initialAverage = p1.add(p2)
-                .divide(BigDecimal.valueOf(2), 2, RoundingMode.HALF_UP);
+        // Média inicial (P1 + P2) / 2
+        BigDecimal initialAverage = BigDecimal.ZERO;
+        if (p1.compareTo(BigDecimal.ZERO) > 0 && p2.compareTo(BigDecimal.ZERO) > 0) {
+            initialAverage = p1.add(p2)
+                    .divide(BigDecimal.valueOf(2), 2, RoundingMode.HALF_UP);
+        } else if (p1.compareTo(BigDecimal.ZERO) > 0) {
+            initialAverage = p1; // Se só tem P1
+        } else if (p2.compareTo(BigDecimal.ZERO) > 0) {
+            initialAverage = p2; // Se só tem P2
+        }
 
-        // Se passou direto
+        // Se passou direto (média >= 7)
         if (initialAverage.compareTo(BigDecimal.valueOf(7)) >= 0) {
             return new AverageResult(
                     initialAverage,
-                    initialAverage,
+                    initialAverage, // Não fez final, média final = média inicial
                     StudentStatus.APROVADO,
                     "Aprovado direto"
             );
         }
 
-        // Se não tem final → reprovado direto
+        // Se não tem final e não passou → reprovado
         if (finalExam.compareTo(BigDecimal.ZERO) == 0) {
             return new AverageResult(
                     initialAverage,
-                    initialAverage,
+                    initialAverage, // Média final igual à inicial
                     StudentStatus.REPROVADO,
-                    "Reprovado por falta de nota final"
+                    "Reprovado por média insuficiente"
             );
         }
 
-        // Média final (recuperação)
+        // Fazer final: (média inicial + final) / 2
         BigDecimal finalAverage = initialAverage.add(finalExam)
                 .divide(BigDecimal.valueOf(2), 2, RoundingMode.HALF_UP);
 
         StudentStatus status =
-                finalAverage.compareTo(BigDecimal.valueOf(7)) >= 0
+                finalAverage.compareTo(BigDecimal.valueOf(5)) >= 0  // Na final, precisa de 5 para passar
                         ? StudentStatus.APROVADO
                         : StudentStatus.REPROVADO;
 

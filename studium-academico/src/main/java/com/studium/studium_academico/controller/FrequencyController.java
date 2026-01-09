@@ -2,6 +2,7 @@ package com.studium.studium_academico.controller;
 
 import com.studium.studium_academico.business.dto.request.FrequencyByRegistrationRequestDTO;
 import com.studium.studium_academico.business.dto.request.FrequencyRequestDTO;
+import com.studium.studium_academico.business.dto.response.ClassroomResponseDTO;
 import com.studium.studium_academico.business.dto.response.FrequencyResponseDTO;
 import com.studium.studium_academico.business.service.FrequencyService;
 import com.studium.studium_academico.business.service.FrequencyFilterService;
@@ -20,6 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j

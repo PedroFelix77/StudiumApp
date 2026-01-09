@@ -3,18 +3,19 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useStudents } from "@/hooks/dashboard/useStudent";
-import { Trash2, Edit } from "lucide-react";
+import { Trash2, Edit, Plus } from "lucide-react";
 import { api } from "@/services/api";
+import { CreateStudentDialog } from "@/components/CreateStudentDialog";
 
-export default function AdminStudentsPage() {
+export default function AdminAlunosPage() {
   const [q, setQ] = useState("");
-  const { items, loading, total, pageNumber, setPageNumber } = useStudents(q, 0, 10);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { items, loading, total, pageNumber, setPageNumber, refetch } = useStudents(q, 0, 10);
 
   async function handleDelete(id: string) {
     if (!confirm("Deseja desativar este aluno?")) return;
     try {
       await api.delete(`/api/students/${id}`);
-      // refetch: simple approach - reload page or trigger a refetch hook you add
       window.location.reload();
     } catch (err) {
       console.error(err);
@@ -31,7 +32,13 @@ export default function AdminStudentsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Alunos Registrados</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle>Alunos Registrados</CardTitle>
+            <Button onClick={() => setDialogOpen(true)}>
+              <Plus size={16} className="mr-2" />
+              Criar Aluno
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex gap-3">
@@ -69,7 +76,6 @@ export default function AdminStudentsPage() {
             </tbody>
           </table>
 
-          {/* simples paginação - adaptem ao seu componente pagination se tiver */}
           <div className="mt-4 flex justify-between items-center">
             <div>{total} resultados</div>
             <div className="space-x-2">
@@ -79,6 +85,14 @@ export default function AdminStudentsPage() {
           </div>
         </CardContent>
       </Card>
+
+      <CreateStudentDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSuccess={() => {
+          refetch();
+        }}
+      />
     </div>
   );
 }

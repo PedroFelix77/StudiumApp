@@ -1,6 +1,8 @@
 package com.studium.studium_academico.business.service;
 
 import com.studium.studium_academico.business.dto.request.TeacherClassCreateDTO;
+import com.studium.studium_academico.business.dto.response.ClassResponseDTO;
+import com.studium.studium_academico.business.dto.response.DisciplineResponseDTO;
 import com.studium.studium_academico.business.dto.response.TeacherClassResponseDTO;
 import com.studium.studium_academico.infrastructure.entity.TeacherClass;
 import com.studium.studium_academico.infrastructure.exceptions.BusinessValidationException;
@@ -8,14 +10,17 @@ import com.studium.studium_academico.infrastructure.exceptions.ResourceNotFoundE
 import com.studium.studium_academico.infrastructure.mapper.TeacherClassMapper;
 import com.studium.studium_academico.infrastructure.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TeacherClassService {
 
     private final TeacherClassRepository repository;
@@ -85,5 +90,38 @@ public class TeacherClassService {
         teacherClass.setIsMainTeacher(dto.isMainTeacher());
 
         return mapper.toResponseDTO(repository.save(teacherClass));
+    }
+
+    public List<ClassResponseDTO> findClassesByTeacher(UUID teacherId) {
+        log.info("Buscando turmas do professor: {}", teacherId);
+
+        return repository.findByTeacherIdWithDetails(teacherId)
+                .stream()
+                .map(teacherClass -> new ClassResponseDTO(
+                        teacherClass.getClassEntity().getId(),
+                        teacherClass.getClassEntity().getName(),
+                        teacherClass.getClassEntity().getCodeClass(),
+                        teacherClass.getClassEntity().getAcademicYear()
+                ))
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    public List<DisciplineResponseDTO> findDisciplinesByTeacherAndClass(UUID teacherId, UUID classId) {
+        log.info("Buscando disciplinas do professor {} na turma {}", teacherId, classId);
+
+        return repository.findByTeacherAndClassWithDisciplineDetails(teacherId, classId)
+                .stream()
+                .map(teacherClass -> new DisciplineResponseDTO(
+                        teacherClass.getDiscipline().getId(),
+                        teacherClass.getDiscipline().getName(),
+                        teacherClass.getDiscipline().getCode(),
+                        teacherClass.getDiscipline().getWorkload(),
+                        null, // course
+                        null, // teacher
+                        null  // classes
+                ))
+                .distinct()
+                .collect(Collectors.toList());
     }
 }

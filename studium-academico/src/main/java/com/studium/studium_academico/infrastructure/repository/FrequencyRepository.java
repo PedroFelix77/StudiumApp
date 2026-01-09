@@ -62,5 +62,4 @@ public interface FrequencyRepository extends JpaRepository<Frequency, UUID>, Jpa
             @Param("status") StatusFrequency status
     );
 
-
 }

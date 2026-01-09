@@ -10,7 +10,7 @@ import CourseModal from "@/components/course-modal"
 import RegistrationModal from "@/components/course-registration-modal"
 import CourseClassesModal from "@/components/CourseClassesModal"
 
-export default function AdminCursos() {
+export default function AdminCursosPage() {
   const [courses, setCourses] = useState<CourseResponseDTO[]>([])
   const [loading, setLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)

@@ -35,7 +35,6 @@ export function Sidebar() {
 
     TEACHER: [
       { label: "Dashboard", path: "/professor/dashboard" },
-      { label: "Alunos", path: "/professor/alunos" },
       { label: "Cursos", path: "/professor/cursos" },
       { label: "Notas", path: "/professor/notas" },
       { label: "Frequências", path: "/professor/frequencias" },

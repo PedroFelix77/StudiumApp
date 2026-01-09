@@ -36,4 +36,19 @@ public interface TeacherClassRepository extends JpaRepository<TeacherClass, UUID
     // MÉTODO NOVO: Buscar por disciplina
     List<TeacherClass> findByDisciplineId(UUID disciplineId);
 
+    @Query("SELECT DISTINCT tc FROM TeacherClass tc " +
+            "JOIN FETCH tc.classEntity cl " +
+            "JOIN FETCH tc.discipline d " +
+            "WHERE tc.teacher.id = :teacherId " +
+            "ORDER BY cl.name")
+    List<TeacherClass> findByTeacherIdWithDetails(@Param("teacherId") UUID teacherId);
+
+    @Query("SELECT tc FROM TeacherClass tc " +
+            "JOIN FETCH tc.discipline d " +
+            "WHERE tc.teacher.id = :teacherId " +
+            "AND tc.classEntity.id = :classId " +
+            "ORDER BY d.name")
+    List<TeacherClass> findByTeacherAndClassWithDisciplineDetails(
+            @Param("teacherId") UUID teacherId,
+            @Param("classId") UUID classId);
 }

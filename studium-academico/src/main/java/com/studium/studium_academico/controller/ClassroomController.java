@@ -1,7 +1,9 @@
 package com.studium.studium_academico.controller;
 
 import com.studium.studium_academico.business.dto.request.ClassroomRequestDTO;
+import com.studium.studium_academico.business.dto.response.ClassResponseDTO;
 import com.studium.studium_academico.business.dto.response.ClassroomResponseDTO;
+import com.studium.studium_academico.business.dto.response.DisciplineResponseDTO;
 import com.studium.studium_academico.business.service.ClassroomService;
 import com.studium.studium_academico.infrastructure.entity.Classroom;
 import com.studium.studium_academico.infrastructure.mapper.ClassroomMapper;
@@ -11,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -56,5 +59,12 @@ public class ClassroomController {
     ) {
         Classroom classroom = service.findByClassAndDiscipline(classId, disciplineId);
         return mapper.toResponse(classroom);
+    }
+
+    @GetMapping("/teacher/{teacherId}")
+    public List<ClassroomResponseDTO> findByTeacher(
+            @PathVariable UUID teacherId
+    ) {
+        return service.findByTeacher(teacherId);
     }
 }

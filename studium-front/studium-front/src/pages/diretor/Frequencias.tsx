@@ -429,14 +429,6 @@ export default function DiretorFrequencias() {
                   <BookOpen size={16} className="mr-2" />
                   Por Curso
                 </Button>
-                <Button
-                  onClick={() => setViewMode("byStudent")}
-                  variant={viewMode === "byStudent" ? "default" : "outline"}
-                  className="flex-1"
-                >
-                  <User size={16} className="mr-2" />
-                  Por Aluno
-                </Button>
               </div>
             </div>
           </div>
