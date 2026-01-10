@@ -7,6 +7,7 @@ import com.studium.studium_academico.business.dto.response.FrequencyResponseDTO;
 import com.studium.studium_academico.business.service.FrequencyService;
 import com.studium.studium_academico.business.service.FrequencyFilterService;
 import com.studium.studium_academico.infrastructure.entity.StatusFrequency;
+import com.studium.studium_academico.infrastructure.entity.Users;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -176,4 +178,5 @@ public class FrequencyController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+    
 }

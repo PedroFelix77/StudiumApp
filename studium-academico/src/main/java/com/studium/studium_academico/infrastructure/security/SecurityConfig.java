@@ -116,7 +116,11 @@ public class SecurityConfig {
                         .hasAnyRole("STUDENT", "DIRECTOR", "ADMIN")
 
 
-                        // TEACHER CLASS
+                        // TEACHER CLASS — SEMPRE PRIMEIRO OS MAIS ESPECÍFICOS
+                        .requestMatchers(HttpMethod.GET, "/api/teacher-classes/my/classes/**")
+                        .hasRole("TEACHER")
+                        .requestMatchers(HttpMethod.GET, "/api/teacher-classes/my/disciplines/**")
+                        .hasRole("TEACHER")
                         .requestMatchers(HttpMethod.GET, "/api/teacher-classes/teacher/*/classes")
                         .hasRole("TEACHER")
 
@@ -125,21 +129,23 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, "/api/teacher-classes/teacher/*/course/*")
                         .hasAnyRole("TEACHER", "DIRECTOR", "ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/teacher-classes")
-                        .hasAnyRole("DIRECTOR", "ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/teacher-classes/**")
-                        .hasAnyRole("DIRECTOR", "ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/teacher-classes/{id}") // ADICIONADO
-                        .hasAnyRole("DIRECTOR", "ADMIN", "TEACHER")
+
                         .requestMatchers(HttpMethod.GET, "/api/teacher-classes/class/**")
-                        .hasAnyRole("DIRECTOR", "ADMIN", "TEACHER") // ADICIONEI TEACHER AQUI
+                        .hasAnyRole("DIRECTOR", "ADMIN", "TEACHER")
+
                         .requestMatchers(HttpMethod.GET, "/api/teacher-classes/teacher/**")
                         .hasAnyRole("TEACHER", "DIRECTOR", "ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/teacher-classes/teacher/*/course/*") // ADICIONADO
-                        .hasAnyRole("TEACHER", "DIRECTOR", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/teacher-classes/**") // ADICIONADO
+
+                        .requestMatchers(HttpMethod.POST, "/api/teacher-classes")
                         .hasAnyRole("DIRECTOR", "ADMIN")
+
+                        .requestMatchers(HttpMethod.PUT, "/api/teacher-classes/**")
+                        .hasAnyRole("DIRECTOR", "ADMIN")
+
                         .requestMatchers(HttpMethod.DELETE, "/api/teacher-classes/**")
+                        .hasAnyRole("DIRECTOR", "ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/teacher-classes/**")
                         .hasAnyRole("DIRECTOR", "ADMIN")
 
                         // DISCIPLINES

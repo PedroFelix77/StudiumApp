@@ -5,10 +5,12 @@ import com.studium.studium_academico.business.dto.response.ClassResponseDTO;
 import com.studium.studium_academico.business.dto.response.DisciplineResponseDTO;
 import com.studium.studium_academico.business.dto.response.TeacherClassResponseDTO;
 import com.studium.studium_academico.business.service.TeacherClassService;
+import com.studium.studium_academico.infrastructure.entity.Users;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -56,10 +58,39 @@ public class TeacherClassesController {
         );
     }
 
+    @GetMapping("/my/disciplines")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<List<DisciplineResponseDTO>> getMyDisciplines(
+            @RequestParam UUID classId
+    ) {
+        Users user = (Users) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        return ResponseEntity.ok(
+                service.findDisciplinesByLoggedTeacherAndClass(user.getId(), classId)
+        );
+    }
+
     @PreAuthorize("hasRole('DIRECTOR') or hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/my/classes")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<List<ClassResponseDTO>> getMyClasses() {
+
+        Users user = (Users) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        return ResponseEntity.ok(
+                service.findClassesByLoggedTeacher(user.getId())
+        );
     }
 }

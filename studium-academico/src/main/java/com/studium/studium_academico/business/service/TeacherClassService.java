@@ -4,6 +4,7 @@ import com.studium.studium_academico.business.dto.request.TeacherClassCreateDTO;
 import com.studium.studium_academico.business.dto.response.ClassResponseDTO;
 import com.studium.studium_academico.business.dto.response.DisciplineResponseDTO;
 import com.studium.studium_academico.business.dto.response.TeacherClassResponseDTO;
+import com.studium.studium_academico.infrastructure.entity.Teacher;
 import com.studium.studium_academico.infrastructure.entity.TeacherClass;
 import com.studium.studium_academico.infrastructure.exceptions.BusinessValidationException;
 import com.studium.studium_academico.infrastructure.exceptions.ResourceNotFoundException;
@@ -123,5 +124,51 @@ public class TeacherClassService {
                 ))
                 .distinct()
                 .collect(Collectors.toList());
+    }
+
+    public List<ClassResponseDTO> findClassesByLoggedTeacher(UUID userId) {
+
+        Teacher teacher = teacherRepository.findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Professor não encontrado para o usuário logado")
+                );
+
+        return repository.findByTeacherIdWithDetails(teacher.getId())
+                .stream()
+                .map(tc -> new ClassResponseDTO(
+                        tc.getClassEntity().getId(),
+                        tc.getClassEntity().getName(),
+                        tc.getClassEntity().getCodeClass(),
+                        tc.getClassEntity().getAcademicYear()
+                ))
+                .distinct()
+                .toList();
+    }
+
+    public List<DisciplineResponseDTO> findDisciplinesByLoggedTeacherAndClass(
+            UUID userId,
+            UUID classId
+    ) {
+
+        Teacher teacher = teacherRepository.findByUserId(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Professor não encontrado para o usuário logado")
+                );
+
+        return repository.findByTeacherAndClassWithDisciplineDetails(
+                        teacher.getId(),
+                        classId
+                ).stream()
+                .map(tc -> new DisciplineResponseDTO(
+                        tc.getDiscipline().getId(),
+                        tc.getDiscipline().getName(),
+                        tc.getDiscipline().getCode(),
+                        tc.getDiscipline().getWorkload(),
+                        null,
+                        null,
+                        null
+                ))
+                .distinct()
+                .toList();
     }
 }

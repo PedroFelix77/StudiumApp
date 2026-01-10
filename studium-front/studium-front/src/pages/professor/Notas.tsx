@@ -87,7 +87,7 @@ export default function NotasProfessorPage() {
       }
 
       // Buscar turmas do professor logado
-      const res = await api.get(`/api/teacher-classes/teacher/${user.id}/classes`)
+      const res = await api.get(`/api/teacher-classes/my/classes`)
       const classesData = res.data.content || res.data || []
       setClasses(Array.isArray(classesData) ? classesData : [])
 
@@ -106,7 +106,7 @@ export default function NotasProfessorPage() {
 
     try {
       // Buscar disciplinas do professor na turma selecionada
-      const res = await api.get(`/api/teacher-classes/teacher/${user.id}/disciplines`, {
+      const res = await api.get(`/api/teacher-classes/my/disciplines`, {
         params: { classId: selectedClass }
       })
 
