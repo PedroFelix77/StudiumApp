@@ -4,6 +4,11 @@ export interface CourseResponseDTO {
   id: string
   name: string
   code_course: string
+  description?: string;
+  status?: string;
+  coordinator?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CourseRequestDTO {

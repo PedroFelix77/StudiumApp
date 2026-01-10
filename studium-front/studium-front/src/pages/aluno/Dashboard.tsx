@@ -2,17 +2,14 @@
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import {
   BookOpen,
   TrendingUp,
   Calendar,
   User,
-  GraduationCap,
   Clock,
   AlertCircle,
   CheckCircle,
-  XCircle
 } from "lucide-react"
 import { api } from "@/services/api"
 import { useAuth } from "@/context/AuthContext"
