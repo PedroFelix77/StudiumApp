@@ -35,9 +35,6 @@ export function CreateStudentDialog({
     const [birthDate, setBirthDate] = useState("");
     const [phone, setPhone] = useState("");
 
-    // Get institutionId from user - hidden field, sent automatically
-    const institutionId = user?.institution?.id || "";
-
     // Address fields
     const [cep, setCep] = useState("");
     const [street, setStreet] = useState("");

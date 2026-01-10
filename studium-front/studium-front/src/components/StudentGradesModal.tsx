@@ -9,7 +9,7 @@ import {
     DialogDescription
 } from "@/components/ui/dialog"
 import { api } from "@/services/api"
-import { BookOpen, TrendingUp } from "lucide-react"
+import { TrendingUp } from "lucide-react"
 
 interface Props {
     open: boolean
@@ -113,7 +113,7 @@ export default function StudentGradesModal({
     const overallAverage =
         Object.values(gradesByCourse).length > 0
             ? Object.values(gradesByCourse).reduce((acc, course) => acc + (course.average || 0), 0) /
-              Object.values(gradesByCourse).length
+            Object.values(gradesByCourse).length
             : 0
 
     return (
